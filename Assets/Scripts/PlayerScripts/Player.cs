@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System.Collections.Generic;
+
 public abstract class Player : MonoBehaviour, IDamageble
 {
     [SerializeField] protected int health;
@@ -9,6 +11,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField] protected float walkSpeed, runSpeed, jumpHeight, turnSpeed = 2f, wallJumpForce = 5, wallJumpHeight = 7;
     [SerializeField] protected int jumpAmount;
     [SerializeField] protected Rigidbody rb;
+    [SerializeField] protected int maxJumpAngle = 45;
     protected int startHealth;
     protected float damagedTimer, justjumpedTimer, distToGround;
     protected bool isInteracting, isNearWall;
@@ -19,18 +22,20 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected LayerMask mask;
     private Vector3 wallJumpDir;
     public int Health { get { return health; } set { health = value; } }
+    public Camera CurrentCamera;
     public Vector3 RespawnPoint;
     //protected HealthBar bar;
-    protected bool grounded => IsGrounded();
+    List<Collider> groundTouchPoints = new List<Collider>();
     protected bool isRunning, inWater;
     protected void Start()
     {
         rb = GetComponent<Rigidbody>();
-        distToGround = GetComponent<Collider>().bounds.extents.y;
+
         startHealth = health;
         RespawnPoint = transform.position;
 
         coll = GetComponent<Collider>();
+        distToGround = coll.bounds.extents.y;
         actions = new PlayerAction();
         actions.Player.Enable();
         actions.Player.Jump.performed += OnJump;
@@ -60,12 +65,6 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             isRunning = false;
         }
-        if (grounded)
-        {
-            //resets jump counters when on ground
-            if (currentAmountOfJumps != jumpAmount)
-                currentAmountOfJumps = jumpAmount;
-        }
         if (damagedTimer > 0)
             damagedTimer -= Time.deltaTime;
         if (justjumpedTimer > 0)
@@ -73,40 +72,24 @@ public abstract class Player : MonoBehaviour, IDamageble
     }
     protected void FixedUpdate()
     {
+        //Gets movement input
         Vector2 inputVector = actions.Player.Move.ReadValue<Vector2>();
-        Vector3 moveDir = new Vector3(inputVector.x, rb.velocity.y, inputVector.y);
-        float magnitude = moveDir.magnitude;
-        magnitude = Mathf.Clamp01(magnitude);
+        //getting camera direction
+        Vector3 forward = CurrentCamera.transform.forward;
+        Vector3 right = CurrentCamera.transform.right;
+        forward.y = 0;
+        right.y = 0;
+        //normalizing vectors 
+        forward = forward.normalized;
+        right = right.normalized;
+        Vector3 forwardRelativeInput = inputVector.y * forward;
+        Vector3 rightRelativeInput = inputVector.x * right;
+        Vector3 cameraRelativeMovement = forwardRelativeInput + rightRelativeInput;
         float speed = (isRunning) ? runSpeed : walkSpeed;
-        if (grounded)
+        rb.velocity = new Vector3(cameraRelativeMovement.x * speed, rb.velocity.y, cameraRelativeMovement.z * speed);
+        if (groundTouchPoints.Count > 0)
         {
-            rb.velocity = new Vector3(moveDir.x * magnitude * speed, rb.velocity.y, moveDir.z * magnitude * speed);
-        }
-        else
-            rb.velocity = new Vector3(moveDir.x * magnitude * (speed / 2), rb.velocity.y, moveDir.z * magnitude * (speed/2));
-        if (moveDir != Vector3.zero)
-        {
-            Quaternion toRotate = Quaternion.LookRotation(moveDir, Vector3.up);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotate, turnSpeed * Time.deltaTime);
-        }
-        if (!grounded)
-        {
-            RaycastHit hit;
-            Vector3 rayCastDir = new Vector3(inputVector.x, 0, inputVector.y);
-            if (Physics.Raycast(transform.position, transform.TransformDirection(rayCastDir), out hit, 1, mask))
-            {
-                isNearWall = true;
-                wallJumpDir = rayCastDir;
-            }
-            else
-            {
-                isNearWall = false;
-                wallJumpDir = Vector3.zero;
-            }
-        }
-        else
-        {
-            isNearWall = false;
+            currentAmountOfJumps = 1;
         }
     }
     public void OnInteract(InputAction.CallbackContext context)
@@ -115,16 +98,6 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             interact();
         }
-    }
-    protected void OnTriggerStay(Collider col)
-    {
-        if (col.gameObject.layer == 4)
-            inWater = true;
-    }
-    protected void OnTriggerExit(Collider col)
-    {
-        if (col.gameObject.layer == 4)
-            inWater = false;
     }
     void interact()
     {
@@ -151,22 +124,16 @@ public abstract class Player : MonoBehaviour, IDamageble
     {
         if (context.performed)
         {
-            if (!isNearWall)
+            if (currentAmountOfJumps < jumpAmount)
             {
-                if (currentAmountOfJumps > 0)
-                {
-                    rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-                    rb.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse);
-                    justjumpedTimer = .1f;
-                    currentAmountOfJumps--;
-                }
+                rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+                rb.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse);
+                justjumpedTimer = .1f;
+                currentAmountOfJumps++;
             }
-            else
+            if (wallJumpDir != Vector3.zero)
             {
-                if (wallJumpDir != Vector3.zero)
-                {
-                    rb.AddForce(new Vector3(-wallJumpDir.x * wallJumpForce, wallJumpHeight, -wallJumpDir.z * wallJumpForce), ForceMode.Impulse);
-                }
+                rb.AddForce(new Vector3(-wallJumpDir.x * wallJumpForce, wallJumpHeight, -wallJumpDir.z * wallJumpForce), ForceMode.Impulse);
             }
         }
     }
@@ -214,27 +181,59 @@ public abstract class Player : MonoBehaviour, IDamageble
         //bar.SetHealth(Health);
         transform.position = RespawnPoint;
     }
-    protected bool IsGrounded()
+    bool CompareLayerIndex(Transform t, LayerMask layer)
     {
-        if (justjumpedTimer > 0)
-            return false;
-
-        // Object size in x
-        float sizeX = coll.bounds.size.x;
-        float sizeZ = coll.bounds.size.z;
-        float sizeY = coll.bounds.size.y;
-        // Position of the 4 bottom corners of the game object
-        // We add 0.01 in Y so that there is some distance between the point and the floor
-        Vector3 corner1 = transform.position + new Vector3(sizeX / 2, -sizeY / 2 + 0.01f, sizeZ / 2);
-        Vector3 corner2 = transform.position + new Vector3(-sizeX / 2, -sizeY / 2 + 0.01f, sizeZ / 2);
-        Vector3 corner3 = transform.position + new Vector3(sizeX / 2, -sizeY / 2 + 0.01f, -sizeZ / 2);
-        Vector3 corner4 = transform.position + new Vector3(-sizeX / 2, -sizeY / 2 + 0.01f, -sizeZ / 2);
-        // Send a short ray down the cube on all 4 corners to detect ground
-        bool grounded1 = Physics.Raycast(corner1, new Vector3(0, -1, 0), 0.01f);
-        bool grounded2 = Physics.Raycast(corner2, new Vector3(0, -1, 0), 0.01f);
-        bool grounded3 = Physics.Raycast(corner3, new Vector3(0, -1, 0), 0.01f);
-        bool grounded4 = Physics.Raycast(corner4, new Vector3(0, -1, 0), 0.01f);
-        // If any corner is grounded, the object is grounded
-        return (grounded1 || grounded2 || grounded3 || grounded4);
+        return Mathf.Pow(2, t.gameObject.layer) == layer;
     }
+    #region Collision
+    protected void OnTriggerStay(Collider col)
+    {
+        if (col.gameObject.layer == 4)
+            inWater = true;
+    }
+    protected void OnCollisionStay(Collision col)
+    {
+        List<ContactPoint> points = new List<ContactPoint>();
+        int numberOfContacts = col.GetContacts(points);
+        for (int i = 0; i < numberOfContacts; i++)
+        {
+            Collider collider = col.collider;
+            if (RoundedNormalVectorAngle(points[i].normal, 3) <= 45 && CompareLayerIndex(col.transform, mask) && !groundTouchPoints.Contains(collider))
+            {
+                groundTouchPoints.Add(collider);
+            }
+            else if(!IsStillTouchingGround(points,numberOfContacts) && groundTouchPoints.Contains(collider))
+                {
+                groundTouchPoints.Remove(collider);
+            }
+        }
+    }
+    protected void OnCollisionExit(Collision col)
+    {
+        Collider collider = col.collider;
+        if (groundTouchPoints.Contains(collider))
+            groundTouchPoints.Remove(collider);
+    }
+    bool IsStillTouchingGround(List<ContactPoint> points, int numberOfContacts)
+    {
+        for(int i = 0; i < numberOfContacts; i++)
+        {
+            if(RoundedNormalVectorAngle(points[i].normal,3) <= maxJumpAngle)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    float RoundedNormalVectorAngle(Vector3 normal, uint decimalAccuracy)
+    {
+        int accuracy = (int)Mathf.Pow(10, decimalAccuracy);
+        return Mathf.RoundToInt(Vector3.Angle(normal, Vector3.up) * accuracy) / accuracy;
+    }
+    protected void OnTriggerExit(Collider col)
+    {
+        //if (col.gameObject.layer == 4)
+        //    inWater = false;
+    }
+    #endregion
 }

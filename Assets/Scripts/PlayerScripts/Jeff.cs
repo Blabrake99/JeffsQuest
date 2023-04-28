@@ -28,4 +28,12 @@ public class Jeff : Player
     {
         base.OnTriggerExit(col); 
     }
+    private void OnCollisionStay(Collision col)
+    {
+        base.OnCollisionStay(col);
+    }
+    private void OnCollisionExit(Collision col)
+    {
+        base.OnCollisionExit(col);
+    }
 }
