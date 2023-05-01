@@ -445,7 +445,7 @@ GameObject:
   m_Component:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
-  - component: {fileID: 963194229}
+  - component: {fileID: 963194230}
   - component: {fileID: 963194226}
   m_Layer: 0
   m_Name: Main Camera
@@ -513,14 +513,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.047631983, y: -0, z: -0, w: 0.99886495}
-  m_LocalPosition: {x: 0.16, y: 2.8700001, z: -8.82}
+  m_LocalPosition: {x: 0.16, y: 3.76, z: -8.74}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &963194229
+--- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -529,18 +529,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e96aea676669a554bb647a537123fffb, type: 3}
+  m_Script: {fileID: 11500000, guid: a8d39c9a956229f4f92c60d2e4484a67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minDistance: 2
-  maxDistance: 4
-  DistanceUp: 0
-  smooth: 4
-  rotateAround: 70
-  target: {fileID: 3991549056075789435}
-  CamOcclusion:
+  _camera: {fileID: 963194227}
+  _target: {fileID: 3991549056075789435}
+  _framing: {x: 0, y: 0}
+  _zoomSpeed: 0.1
+  _defaultDistance: 5
+  _minDistance: 0
+  _maxDistance: 10
+  _invertX: 0
+  _invertY: 0
+  _RotationSharpness: 25
+  _defaultVerticalAngle: 20
+  _minVerticalAngle: -90
+  _maxVerticalAngle: 90
+  _checkRadius: 0.2
+  _obstructionLayers:
     serializedVersion: 2
-    m_Bits: 9
+    m_Bits: 63
 --- !u!1 &1096771814
 GameObject:
   m_ObjectHideFlags: 0
