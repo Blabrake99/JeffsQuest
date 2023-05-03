@@ -2051,15 +2051,19 @@ MonoBehaviour:
   health: 5
   damage: 1
   damageCooldown: 1
-  walkSpeed: 5
-  runSpeed: 10
   jumpHeight: 7
   turnSpeed: 2
   wallJumpForce: 20
   wallJumpHeight: 8
+  maxWalkSpeed: 5
+  maxRunSpeed: 8
+  walkAccelerationSpeed: 1
+  runAccelerationSpeed: 1.5
+  decelerationSpeed: 3
   jumpAmount: 2
   rb: {fileID: 0}
   maxJumpAngle: 45
+  speed: 0
   mask:
     serializedVersion: 2
     m_Bits: 8

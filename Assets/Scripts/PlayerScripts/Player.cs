@@ -8,7 +8,9 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField] protected int health;
     [SerializeField] protected int damage;
     [SerializeField] protected float damageCooldown;
-    [SerializeField] protected float walkSpeed, runSpeed, jumpHeight, turnSpeed = 2f, wallJumpForce = 5, wallJumpHeight = 7;
+    [SerializeField] protected float jumpHeight, turnSpeed = 2f, wallJumpForce = 5, wallJumpHeight = 7;
+    [SerializeField, Range(1, 15f)] protected float maxWalkSpeed, maxRunSpeed;
+    [SerializeField, Range(.1f,5f)] protected float walkAccelerationSpeed, runAccelerationSpeed, decelerationSpeed;
     [SerializeField] protected int jumpAmount;
     [SerializeField] protected Rigidbody rb;
     [SerializeField] protected int maxJumpAngle = 45;
@@ -18,8 +20,9 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected PlayerAction actions;
     protected int currentAmountOfJumps;
     protected Collider coll;
-    [SerializeField]
-    protected LayerMask mask;
+    protected Vector3 lastRelativeMovement;
+    [SerializeField] protected float speed;
+    [SerializeField] protected LayerMask mask;
     private Vector3 wallJumpDir;
     public int Health { get { return health; } set { health = value; } }
     public Camera CurrentCamera;
@@ -85,8 +88,20 @@ public abstract class Player : MonoBehaviour, IDamageble
         Vector3 forwardRelativeInput = inputVector.y * forward;
         Vector3 rightRelativeInput = inputVector.x * right;
         Vector3 cameraRelativeMovement = forwardRelativeInput + rightRelativeInput;
-        float speed = (isRunning) ? runSpeed : walkSpeed;
-        rb.velocity = new Vector3(cameraRelativeMovement.x * speed, rb.velocity.y, cameraRelativeMovement.z * speed);
+        if (cameraRelativeMovement != Vector3.zero)
+            lastRelativeMovement = cameraRelativeMovement;
+
+        if (inputVector != Vector2.zero)
+        {
+            speed = (isRunning) ? Mathf.Lerp(speed, maxRunSpeed, Time.deltaTime * runAccelerationSpeed) : Mathf.Lerp(speed, maxWalkSpeed, Time.deltaTime * walkAccelerationSpeed);
+            rb.velocity = new Vector3(cameraRelativeMovement.x * speed, rb.velocity.y, cameraRelativeMovement.z * speed);
+        }
+        else
+        {
+            speed = Mathf.Lerp(speed, 0, Time.deltaTime * decelerationSpeed);
+            rb.velocity = new Vector3(lastRelativeMovement.x * speed, rb.velocity.y, lastRelativeMovement.z * speed);
+        }
+
         if (groundTouchPoints.Count > 0)
         {
             currentAmountOfJumps = 1;
