@@ -20,20 +20,20 @@ public class Jeff : Player
     {
         base.FixedUpdate();
     }
-    private void OnTriggerStay(Collider col)
-    {
-        base.OnTriggerStay(col);
-    }
-    private void OnTriggerExit(Collider col)
-    {
-        base.OnTriggerExit(col); 
-    }
-    private void OnCollisionStay(Collision col)
-    {
-        base.OnCollisionStay(col);
-    }
-    private void OnCollisionExit(Collision col)
-    {
-        base.OnCollisionExit(col);
-    }
+    //private void OnTriggerStay(Collider col)
+    //{
+    //    base.OnTriggerStay(col);
+    //}
+    //private void OnTriggerExit(Collider col)
+    //{
+    //    base.OnTriggerExit(col); 
+    //}
+    //private void OnCollisionStay(Collision col)
+    //{
+    //    base.OnCollisionStay(col);
+    //}
+    //private void OnCollisionExit(Collision col)
+    //{
+    //    base.OnCollisionExit(col);
+    //}
 }
