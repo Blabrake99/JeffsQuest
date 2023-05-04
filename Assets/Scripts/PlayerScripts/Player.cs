@@ -50,7 +50,6 @@ public abstract class Player : MonoBehaviour, IDamageble
         actions.Player.Jump.performed += OnJump;
         actions.Player.Interact.performed += OnInteract;
         actions.Player.Fire.performed += OnFire;
-        animatorWalkSpeed = Mathf.Clamp(animatorWalkSpeed, 0f, 1f);
     }
     public void Damage(int amount)
     {
@@ -101,12 +100,15 @@ public abstract class Player : MonoBehaviour, IDamageble
 
         if (IsGrounded())
         {
+            print("yes");
             if (inputVector != Vector2.zero)
             {
                 speed = (isRunning) ? Mathf.Lerp(speed, maxRunSpeed, Time.deltaTime * runAccelerationSpeed) : Mathf.Lerp(speed, maxWalkSpeed, Time.deltaTime * walkAccelerationSpeed);
                 if (isRunning)
                 {
+                    if(animatorWalkSpeed < 1f)
                     animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
+
                     anim.speed = 1;
                 }
                 else 
@@ -152,11 +154,13 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         else
         {
+            anim.speed = 1;
+            anim.SetFloat("Velocity", 0);
             if (inputVector != Vector2.zero)
             {
                 speed = (speed < maxAirSpeed) ? Mathf.Lerp(speed, maxAirSpeed, Time.deltaTime * airAcceleration) : Mathf.Lerp(speed, maxAirSpeed, Time.deltaTime * airDecelerationSpeed);
-
-                rb.velocity = new Vector3(cameraRelativeMovement.x * speed, rb.velocity.y, cameraRelativeMovement.z * speed);
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lastRelativeMovement), Time.deltaTime * turnSpeed);
+                rb.velocity = new Vector3(lastRelativeMovement.x * speed, rb.velocity.y, lastRelativeMovement.z * speed);
             }
         }
     }
@@ -192,8 +196,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     {
         if (context.performed)
         {
-            print(context.ReadValue<float>());
-            if (currentAmountOfJumps < jumpAmount)
+            if (currentAmountOfJumps <= jumpAmount)
             {
                 rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
                 rb.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse);
@@ -262,7 +265,10 @@ public abstract class Player : MonoBehaviour, IDamageble
     }
     bool IsGrounded()
     {
-        return Physics.CheckSphere(groundCheck.position, .1f, mask);
+        if (justjumpedTimer <= 0)
+            return Physics.CheckSphere(groundCheck.position, .1f, mask);
+        else
+            return false;
     }
 
     protected void OnTriggerExit(Collider col)
