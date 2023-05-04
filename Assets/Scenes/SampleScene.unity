@@ -2084,7 +2084,7 @@ MonoBehaviour:
   damage: 1
   damageCooldown: 1
   jumpHeight: 7
-  turnSpeed: 2
+  turnSpeed: 15
   wallJumpForce: 20
   wallJumpHeight: 8
   maxWalkSpeed: 5
@@ -2096,7 +2096,7 @@ MonoBehaviour:
   airAcceleration: 3.15
   airDecelerationSpeed: 0.5
   animatorWalkAcceleration: 2
-  animatorWalkdeceleration: 3
+  animatorWalkdeceleration: 5
   jumpAmount: 2
   mask:
     serializedVersion: 2

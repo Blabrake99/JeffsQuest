@@ -101,23 +101,37 @@ public abstract class Player : MonoBehaviour, IDamageble
 
         if (IsGrounded())
         {
-
-            if (inputVector.x > .1 || inputVector.x < -.1 || inputVector.y < -.1f || inputVector.y > .1f )
+            if (inputVector != Vector2.zero)
             {
                 speed = (isRunning) ? Mathf.Lerp(speed, maxRunSpeed, Time.deltaTime * runAccelerationSpeed) : Mathf.Lerp(speed, maxWalkSpeed, Time.deltaTime * walkAccelerationSpeed);
                 if (isRunning)
                 {
                     animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
+                    anim.speed = 1;
                 }
-                else if(animatorWalkSpeed < .5f)
+                else 
                 {
 
-                    animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
-                }
+                    if (Mathf.Abs(inputVector.x) > Mathf.Abs(inputVector.y))
+                    {
+                        anim.speed = Mathf.Abs(inputVector.x);
+                    }
+                    else if(Mathf.Abs(inputVector.x) < Mathf.Abs(inputVector.y))
+                    {
+                        
+                        anim.speed = Mathf.Abs(inputVector.y);
+                    } 
+                    if (animatorWalkSpeed < .5f)
+                        animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
+                    if(animatorWalkSpeed > .5f)
+                        animatorWalkSpeed = .5f;
+                } 
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(cameraRelativeMovement), Time.deltaTime * turnSpeed);
                 rb.velocity = new Vector3(cameraRelativeMovement.x * speed, rb.velocity.y, cameraRelativeMovement.z * speed);
             }
             else
             {
+                anim.speed = 1;
                 if (rb.velocity.x > .01f && rb.velocity.z > .01f)
                 {
                     speed = Mathf.Lerp(speed, 0, Time.deltaTime * decelerationSpeed);
@@ -132,6 +146,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                     animatorWalkSpeed = 0;
                 }
             }
+
             anim.SetFloat("Velocity", animatorWalkSpeed);
             currentAmountOfJumps = 1;
         }
