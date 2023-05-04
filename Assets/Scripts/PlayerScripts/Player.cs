@@ -5,15 +5,17 @@ using System.Collections.Generic;
 
 public abstract class Player : MonoBehaviour, IDamageble
 {
-    [SerializeField] protected int health;
-    [SerializeField] protected int damage;
-    [SerializeField] protected float damageCooldown;
-    [SerializeField] protected float jumpHeight, turnSpeed = 2f, wallJumpForce = 5, wallJumpHeight = 7;
+    [Header("For Combat")]
+    [SerializeField, Tooltip("Players health")] protected int health;
+    [SerializeField, Tooltip("Players attack damage")] protected int damage;
+    [SerializeField, Tooltip("Players IFrames")] protected float damageCooldown;
+
+    [Header("For Movement")]
+    [SerializeField, Tooltip("How high the player jumps")] protected float jumpHeight;
+    [SerializeField] protected float turnSpeed = 2f, wallJumpForce = 5, wallJumpHeight = 7;
     [SerializeField, Range(1, 15f)] protected float maxWalkSpeed = 5, maxRunSpeed = 7, maxAirSpeed = 1f;
-    [SerializeField, Range(.1f, 5f)] protected float walkAccelerationSpeed, runAccelerationSpeed, decelerationSpeed, airAcceleration;
-    [SerializeField] protected int jumpAmount;
-    [SerializeField] protected Rigidbody rb;
-    [SerializeField] protected int maxJumpAngle = 45;
+    [SerializeField, Range(.1f, 5f)] protected float walkAccelerationSpeed, runAccelerationSpeed, decelerationSpeed, airAcceleration, airDecelerationSpeed;
+    [SerializeField, Tooltip("Players jump count")] protected int jumpAmount;
     protected int startHealth;
     protected float damagedTimer, justjumpedTimer, distToGround;
     protected bool isInteracting, isNearWall;
@@ -21,15 +23,18 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected int currentAmountOfJumps;
     protected Collider coll;
     protected Vector3 lastRelativeMovement;
-    [SerializeField] protected float speed;
-    [SerializeField] protected LayerMask mask;
-    [SerializeField] protected Transform groundCheck;
+    protected float speed;
+    protected Rigidbody rb;
+
+    [Header("Pat Don't touch")]
+    [SerializeField, Tooltip("Ground check mask")] protected LayerMask mask;
+    [SerializeField, Tooltip("The object at the bottom of the player")] protected Transform groundCheck;
+    [SerializeField, Tooltip("The Main Camera")] Camera CurrentCamera;
     private Vector3 wallJumpDir;
     public int Health { get { return health; } set { health = value; } }
-    public Camera CurrentCamera;
-    public Vector3 RespawnPoint;
     //protected HealthBar bar;
     protected bool isRunning, inWater;
+    [HideInInspector] public Vector3 RespawnPoint;
     protected void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -110,10 +115,8 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             if (inputVector != Vector2.zero)
             {
-                if (speed < maxAirSpeed)
-                {
-                    speed = Mathf.Lerp(speed, maxAirSpeed, Time.deltaTime * airAcceleration);
-                }
+                speed = (speed < maxAirSpeed) ? Mathf.Lerp(speed, maxAirSpeed, Time.deltaTime * airAcceleration) : Mathf.Lerp(speed, maxAirSpeed, Time.deltaTime * airDecelerationSpeed);
+
                 rb.velocity = new Vector3(cameraRelativeMovement.x * speed, rb.velocity.y, cameraRelativeMovement.z * speed);
             }
         }
