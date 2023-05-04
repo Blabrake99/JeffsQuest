@@ -2095,6 +2095,8 @@ MonoBehaviour:
   decelerationSpeed: 3
   airAcceleration: 3.15
   airDecelerationSpeed: 0.5
+  animatorWalkAcceleration: 2
+  animatorWalkdeceleration: 3
   jumpAmount: 2
   mask:
     serializedVersion: 2

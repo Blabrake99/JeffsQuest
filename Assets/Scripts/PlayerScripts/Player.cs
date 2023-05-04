@@ -14,7 +14,8 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Tooltip("How high the player jumps")] protected float jumpHeight;
     [SerializeField] protected float turnSpeed = 2f, wallJumpForce = 5, wallJumpHeight = 7;
     [SerializeField, Range(1, 15f)] protected float maxWalkSpeed = 5, maxRunSpeed = 7, maxAirSpeed = 1f;
-    [SerializeField, Range(.1f, 5f)] protected float walkAccelerationSpeed, runAccelerationSpeed, decelerationSpeed, airAcceleration, airDecelerationSpeed;
+    [SerializeField, Range(.1f, 5f)] protected float walkAccelerationSpeed, runAccelerationSpeed, decelerationSpeed, airAcceleration, airDecelerationSpeed
+        , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f;
     [SerializeField, Tooltip("Players jump count")] protected int jumpAmount;
     protected int startHealth;
     protected float damagedTimer, justjumpedTimer, distToGround;
@@ -23,9 +24,9 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected int currentAmountOfJumps;
     protected Collider coll;
     protected Vector3 lastRelativeMovement;
-    protected float speed;
+    protected float speed, animatorWalkSpeed;
     protected Rigidbody rb;
-
+    protected Animator anim;
     [Header("Pat Don't touch")]
     [SerializeField, Tooltip("Ground check mask")] protected LayerMask mask;
     [SerializeField, Tooltip("The object at the bottom of the player")] protected Transform groundCheck;
@@ -41,7 +42,7 @@ public abstract class Player : MonoBehaviour, IDamageble
 
         startHealth = health;
         RespawnPoint = transform.position;
-
+        anim = GetComponent<Animator>();
         coll = GetComponent<Collider>();
         distToGround = coll.bounds.extents.y;
         actions = new PlayerAction();
@@ -49,6 +50,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         actions.Player.Jump.performed += OnJump;
         actions.Player.Interact.performed += OnInteract;
         actions.Player.Fire.performed += OnFire;
+        animatorWalkSpeed = Mathf.Clamp(animatorWalkSpeed, 0f, 1f);
     }
     public void Damage(int amount)
     {
@@ -99,16 +101,38 @@ public abstract class Player : MonoBehaviour, IDamageble
 
         if (IsGrounded())
         {
-            if (inputVector != Vector2.zero)
+
+            if (inputVector.x > .1 || inputVector.x < -.1 || inputVector.y < -.1f || inputVector.y > .1f )
             {
                 speed = (isRunning) ? Mathf.Lerp(speed, maxRunSpeed, Time.deltaTime * runAccelerationSpeed) : Mathf.Lerp(speed, maxWalkSpeed, Time.deltaTime * walkAccelerationSpeed);
+                if (isRunning)
+                {
+                    animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
+                }
+                else if(animatorWalkSpeed < .5f)
+                {
+
+                    animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
+                }
                 rb.velocity = new Vector3(cameraRelativeMovement.x * speed, rb.velocity.y, cameraRelativeMovement.z * speed);
             }
             else
             {
-                speed = Mathf.Lerp(speed, 0, Time.deltaTime * decelerationSpeed);
-                rb.velocity = new Vector3(lastRelativeMovement.x * speed, rb.velocity.y, lastRelativeMovement.z * speed);
+                if (rb.velocity.x > .01f && rb.velocity.z > .01f)
+                {
+                    speed = Mathf.Lerp(speed, 0, Time.deltaTime * decelerationSpeed);
+                    rb.velocity = new Vector3(lastRelativeMovement.x * speed, rb.velocity.y, lastRelativeMovement.z * speed);
+                }
+                if (animatorWalkSpeed > 0)
+                {
+                    animatorWalkSpeed -= animatorWalkdeceleration * Time.deltaTime;
+                }
+                else
+                {
+                    animatorWalkSpeed = 0;
+                }
             }
+            anim.SetFloat("Velocity", animatorWalkSpeed);
             currentAmountOfJumps = 1;
         }
         else
@@ -153,6 +177,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     {
         if (context.performed)
         {
+            print(context.ReadValue<float>());
             if (currentAmountOfJumps < jumpAmount)
             {
                 rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
