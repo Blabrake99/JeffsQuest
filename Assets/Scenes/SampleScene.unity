@@ -2088,12 +2088,12 @@ MonoBehaviour:
   wallJumpForce: 20
   wallJumpHeight: 8
   maxWalkSpeed: 5
-  maxRunSpeed: 8
+  maxRunSpeed: 14
   maxAirSpeed: 1
-  walkAccelerationSpeed: 1
-  runAccelerationSpeed: 1.5
+  walkAccelerationSpeed: 4.83
+  runAccelerationSpeed: 4.76
   decelerationSpeed: 3
-  airAcceleration: 0.5
+  airAcceleration: 3.15
   jumpAmount: 2
   rb: {fileID: 0}
   maxJumpAngle: 45
