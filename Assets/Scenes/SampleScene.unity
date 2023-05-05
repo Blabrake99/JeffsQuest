@@ -2090,6 +2090,7 @@ MonoBehaviour:
   maxWalkSpeed: 5
   maxRunSpeed: 14
   maxAirSpeed: 1
+  maxCrouchSpeed: 3
   walkAccelerationSpeed: 4.83
   runAccelerationSpeed: 4.76
   decelerationSpeed: 4
@@ -2097,6 +2098,8 @@ MonoBehaviour:
   airDecelerationSpeed: 0.5
   animatorWalkAcceleration: 2
   animatorWalkdeceleration: 5
+  crouchacceration: 1
+  crouchdecleration: 2
   jumpAmount: 1
   mask:
     serializedVersion: 2

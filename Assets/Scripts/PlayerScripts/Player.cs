@@ -13,9 +13,10 @@ public abstract class Player : MonoBehaviour, IDamageble
     [Header("For Movement")]
     [SerializeField, Tooltip("How high the player jumps")] protected float jumpHeight;
     [SerializeField] protected float turnSpeed = 2f, wallJumpForce = 5, wallJumpHeight = 7;
-    [SerializeField, Range(1, 15f)] protected float maxWalkSpeed = 5, maxRunSpeed = 7, maxAirSpeed = 1f;
-    [SerializeField, Range(.1f, 5f)] protected float walkAccelerationSpeed, runAccelerationSpeed, decelerationSpeed, airAcceleration, airDecelerationSpeed
-        , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f;
+    [SerializeField, Range(1, 15f)] protected float maxWalkSpeed = 5, maxRunSpeed = 7, maxAirSpeed = 1f, maxCrouchSpeed = 3;
+    [SerializeField, Range(.1f, 5f)]
+    protected float walkAccelerationSpeed, runAccelerationSpeed, decelerationSpeed, airAcceleration, airDecelerationSpeed
+        , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f, crouchacceration = .2f, crouchdecleration = .5f;
     [SerializeField, Tooltip("Players jump count")] protected int jumpAmount;
     protected int startHealth;
     protected float damagedTimer, justjumpedTimer, distToGround;
@@ -34,7 +35,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     private Vector3 wallJumpDir;
     public int Health { get { return health; } set { health = value; } }
     //protected HealthBar bar;
-    protected bool isRunning, inWater;
+    protected bool isRunning, inWater, isCrouching;
     [HideInInspector] public Vector3 RespawnPoint;
     protected void Start()
     {
@@ -66,13 +67,23 @@ public abstract class Player : MonoBehaviour, IDamageble
     }
     protected void Update()
     {
-        if (actions.Player.Run.ReadValue<float>() > 0)
+        if (actions.Player.Run.ReadValue<float>() > 0 && !isCrouching)
         {
             isRunning = true;
         }
         else
         {
             isRunning = false;
+        }
+        if (actions.Player.Crouch.ReadValue<float>() > 0 && IsGrounded())
+        {
+            anim.SetBool("Crouch", true);
+            isCrouching = true;
+        }
+        if(actions.Player.Crouch.ReadValue<float>() <= 0 || !IsGrounded())
+        {
+            isCrouching = false;
+            anim.SetBool("Crouch", false);
         }
         if (damagedTimer > 0)
             damagedTimer -= Time.deltaTime;
@@ -100,34 +111,41 @@ public abstract class Player : MonoBehaviour, IDamageble
 
         if (IsGrounded())
         {
-            print("yes");
+            anim.SetBool("Jump", false);
             if (inputVector != Vector2.zero)
             {
-                speed = (isRunning) ? Mathf.Lerp(speed, maxRunSpeed, Time.deltaTime * runAccelerationSpeed) : Mathf.Lerp(speed, maxWalkSpeed, Time.deltaTime * walkAccelerationSpeed);
+                if (!isCrouching)
+                {
+                    speed = (isRunning) ? Mathf.Lerp(speed, maxRunSpeed, Time.deltaTime * runAccelerationSpeed) : Mathf.Lerp(speed, maxWalkSpeed, Time.deltaTime * walkAccelerationSpeed);
+                }
+                else
+                {
+                    speed = Mathf.Lerp(speed, maxCrouchSpeed, Time.deltaTime * crouchacceration);
+                }
                 if (isRunning)
                 {
-                    if(animatorWalkSpeed < 1f)
-                    animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
+                    if (animatorWalkSpeed < 1f)
+                        animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
 
                     anim.speed = 1;
                 }
-                else 
+                else
                 {
 
                     if (Mathf.Abs(inputVector.x) > Mathf.Abs(inputVector.y))
                     {
                         anim.speed = Mathf.Abs(inputVector.x);
                     }
-                    else if(Mathf.Abs(inputVector.x) < Mathf.Abs(inputVector.y))
+                    else if (Mathf.Abs(inputVector.x) < Mathf.Abs(inputVector.y))
                     {
-                        
+
                         anim.speed = Mathf.Abs(inputVector.y);
-                    } 
+                    }
                     if (animatorWalkSpeed < .5f)
                         animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
-                    if(animatorWalkSpeed > .5f)
+                    if (animatorWalkSpeed > .5f)
                         animatorWalkSpeed = .5f;
-                } 
+                }
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(cameraRelativeMovement), Time.deltaTime * turnSpeed);
                 rb.velocity = new Vector3(cameraRelativeMovement.x * speed, rb.velocity.y, cameraRelativeMovement.z * speed);
             }
@@ -136,7 +154,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                 anim.speed = 1;
                 if (rb.velocity.x > .01f && rb.velocity.z > .01f)
                 {
-                    speed = Mathf.Lerp(speed, 0, Time.deltaTime * decelerationSpeed);
+                    speed = (isRunning) ? Mathf.Lerp(speed, 0, Time.deltaTime * crouchdecleration) : Mathf.Lerp(speed, 0, Time.deltaTime * decelerationSpeed);
                     rb.velocity = new Vector3(lastRelativeMovement.x * speed, rb.velocity.y, lastRelativeMovement.z * speed);
                 }
                 if (animatorWalkSpeed > 0)
@@ -198,6 +216,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             if (currentAmountOfJumps <= jumpAmount)
             {
+                anim.SetBool("Jump", true);
                 rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
                 rb.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse);
                 justjumpedTimer = .1f;
@@ -214,19 +233,6 @@ public abstract class Player : MonoBehaviour, IDamageble
         if (context.performed)
         {
 
-        }
-    }
-    public void OnRun(InputAction.CallbackContext context)
-    {
-        if (context.performed)
-        {
-            isRunning = true;
-            print("running");
-        }
-        else if (context.canceled)
-        {
-            isRunning = false;
-            print("stop");
         }
     }
     public bool MaxHealth()
