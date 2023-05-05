@@ -2091,6 +2091,8 @@ MonoBehaviour:
   maxRunSpeed: 14
   maxAirSpeed: 1
   maxCrouchSpeed: 3
+  longJumpXZForce: 5
+  longJumpYForce: 5
   walkAccelerationSpeed: 4.83
   runAccelerationSpeed: 4.76
   decelerationSpeed: 4

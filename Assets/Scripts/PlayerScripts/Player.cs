@@ -13,7 +13,8 @@ public abstract class Player : MonoBehaviour, IDamageble
     [Header("For Movement")]
     [SerializeField, Tooltip("How high the player jumps")] protected float jumpHeight;
     [SerializeField] protected float turnSpeed = 2f, wallJumpForce = 5, wallJumpHeight = 7;
-    [SerializeField, Range(1, 15f)] protected float maxWalkSpeed = 5, maxRunSpeed = 7, maxAirSpeed = 1f, maxCrouchSpeed = 3;
+    [SerializeField, Range(1, 15f)] protected float maxWalkSpeed = 5, maxRunSpeed = 7, maxAirSpeed = 1f, maxCrouchSpeed = 3, longJumpXZForce
+        , longJumpYForce;
     [SerializeField, Range(.1f, 5f)]
     protected float walkAccelerationSpeed, runAccelerationSpeed, decelerationSpeed, airAcceleration, airDecelerationSpeed
         , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f, crouchacceration = .2f, crouchdecleration = .5f;
@@ -35,7 +36,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     private Vector3 wallJumpDir;
     public int Health { get { return health; } set { health = value; } }
     //protected HealthBar bar;
-    protected bool isRunning, inWater, isCrouching;
+    protected bool isRunning, inWater, isCrouching, isLongJumping;
     [HideInInspector] public Vector3 RespawnPoint;
     protected void Start()
     {
@@ -77,8 +78,17 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         if (actions.Player.Crouch.ReadValue<float>() > 0 && IsGrounded())
         {
-            anim.SetBool("Crouch", true);
-            isCrouching = true;
+            if (speed <= maxWalkSpeed)
+            {
+                isLongJumping = false;
+                anim.SetBool("Crouch", true);
+                isCrouching = true;
+            }
+            else
+            {
+                print("Longjumping");
+                isLongJumping = true;
+            }
         }
         if(actions.Player.Crouch.ReadValue<float>() <= 0 || !IsGrounded())
         {
@@ -154,8 +164,17 @@ public abstract class Player : MonoBehaviour, IDamageble
                 anim.speed = 1;
                 if (rb.velocity.x > .01f && rb.velocity.z > .01f)
                 {
-                    speed = (isRunning) ? Mathf.Lerp(speed, 0, Time.deltaTime * crouchdecleration) : Mathf.Lerp(speed, 0, Time.deltaTime * decelerationSpeed);
-                    rb.velocity = new Vector3(lastRelativeMovement.x * speed, rb.velocity.y, lastRelativeMovement.z * speed);
+                    if (!isLongJumping)
+                    {
+                        speed = (isCrouching) ? Mathf.Lerp(speed, 0, Time.deltaTime * crouchdecleration) : Mathf.Lerp(speed, 0, Time.deltaTime * decelerationSpeed);
+                        rb.velocity = new Vector3(lastRelativeMovement.x * speed, rb.velocity.y, lastRelativeMovement.z * speed);
+                    }
+                    else
+                    {
+                        rb.AddForce(Vector3.up * longJumpYForce, ForceMode.Impulse);
+                        rb.AddForce(Vector3.forward * longJumpXZForce, ForceMode.Impulse);
+                        isLongJumping = false;
+                    }
                 }
                 if (animatorWalkSpeed > 0)
                 {
@@ -178,7 +197,6 @@ public abstract class Player : MonoBehaviour, IDamageble
             {
                 speed = (speed < maxAirSpeed) ? Mathf.Lerp(speed, maxAirSpeed, Time.deltaTime * airAcceleration) : Mathf.Lerp(speed, maxAirSpeed, Time.deltaTime * airDecelerationSpeed);
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lastRelativeMovement), Time.deltaTime * turnSpeed);
-                rb.velocity = new Vector3(lastRelativeMovement.x * speed, rb.velocity.y, lastRelativeMovement.z * speed);
             }
         }
     }
