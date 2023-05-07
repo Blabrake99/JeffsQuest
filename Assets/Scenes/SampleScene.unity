@@ -2050,7 +2050,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3991549056075789435}
-  - component: {fileID: 4336689482276351682}
   - component: {fileID: 4336689482276351689}
   - component: {fileID: 4336689482276351687}
   - component: {fileID: 4336689482276351686}
@@ -2065,47 +2064,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &4336689482276351682
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4336689482276351681}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11d273a1a4b204a4b9806cee2ecbef40, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  health: 5
-  damage: 1
-  damageCooldown: 1
-  jumpHeight: 7
-  turnSpeed: 15
-  wallJumpForce: 60
-  wallJumpHeight: 8
-  maxWalkSpeed: 5
-  maxRunSpeed: 14
-  maxAirSpeed: 1
-  maxCrouchSpeed: 3
-  longJumpXZForce: 5
-  longJumpYForce: 5
-  walkAccelerationSpeed: 4.83
-  runAccelerationSpeed: 4.76
-  decelerationSpeed: 4
-  airAcceleration: 3.15
-  airDecelerationSpeed: 0.5
-  animatorWalkAcceleration: 2
-  animatorWalkdeceleration: 5
-  crouchacceration: 1
-  crouchdecleration: 2
-  jumpAmount: 2
-  mask:
-    serializedVersion: 2
-    m_Bits: 8
-  groundCheck: {fileID: 1363259714}
-  CurrentCamera: {fileID: 963194227}
-  RespawnPoint: {x: 0, y: 0, z: 0}
 --- !u!65 &4336689482276351683
 BoxCollider:
   m_ObjectHideFlags: 0
