@@ -6,8 +6,10 @@ public abstract class Player : MonoBehaviour, IDamageble
 {
     [SerializeField, Tooltip("Players health")] protected int health = 6;
     [SerializeField, Tooltip("Players IFrames")] protected float damageCooldown;
-    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f,maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f;
-    [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")] float maxAcceleration = 10f, maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f;
+    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f, maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f;
+    [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")]
+    float maxAcceleration = 10f, maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f
+        , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f;
     [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float jumpHeight = 2f;
     [SerializeField, Range(0, 5), Tooltip("How many jumps the players allowed to do")] int maxAirJumps = 1;
     [SerializeField, Range(0f, 90f), Tooltip("This is the max ground angle to tell if the players Grounded or not")]
@@ -44,7 +46,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected bool ONSteep => _steepContactCount > 0;
     protected bool Climbing => _climbContactCount > 0 && _stepsSinceLastJump > 2;
     protected int _jumpPhase;
-    protected float _minGroundDotProduct, _minStairsDotProduct, _minClimbDotProduct;
+    protected float _minGroundDotProduct, _minStairsDotProduct, _minClimbDotProduct, animatorWalkSpeed;
     protected int _stepsSinceLastGrounded, _stepsSinceLastJump;
     protected bool InWater => _submergence > 0f;
     protected float _submergence, damagedTimer;
@@ -106,7 +108,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             _rightAxis = ProjectDirectionOnPlane(Vector3.right, _upAxis);
             _forwardAxis = ProjectDirectionOnPlane(Vector3.forward, _upAxis);
         }
-        if(ONGround && _body.velocity.y < 0 || Swimming)
+        if (ONGround && _body.velocity.y < 0 || Swimming)
         {
             anim.SetBool("Jump", false);
         }
@@ -128,17 +130,19 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         if (Gamepad.all.Count > 0)
         {
-            if(_playerInput.x > .7f || _playerInput.y > .7f ||
-                _playerInput.x < -.7f || _playerInput.y < -.7f)
+            if (_playerInput.x >= .7f || _playerInput.y >= .7f ||
+                _playerInput.x <= -.7f || _playerInput.y <= -.7f)
             {
                 curSpeed = maxRunSpeed;
-                anim.SetFloat("Velocity", 1f);
+                FixWalkingAnim(true);
+
+                anim.speed = 1;
             }
-            if (_playerInput.x <= .7f && _playerInput.y <= .7f &&
-                _playerInput.x >= -.7f && _playerInput.y >= -.7f)
+            if (_playerInput.x < .7f && _playerInput.y < .7f &&
+                _playerInput.x > -.7f && _playerInput.y > -.7f)
             {
                 curSpeed = maxWalkSpeed;
-                anim.SetFloat("Velocity", .5f);
+                FixWalkingAnim(false);
             }
         }
         else
@@ -147,9 +151,13 @@ public abstract class Player : MonoBehaviour, IDamageble
             if (_velocity.x != 0 || _velocity.z != 0)
             {
                 if (_desiredRunning == 0)
-                    anim.SetFloat("Velocity", .5f);
+                {
+                    FixWalkingAnim(false);
+                }
                 else
-                    anim.SetFloat("Velocity", 1f);
+                {
+                    FixWalkingAnim(true);
+                }
             }
         }
         AdjustVelocity();
@@ -188,16 +196,45 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             _velocity += gravity * Time.deltaTime;
         }
-        if (_velocity.x == 0 && _velocity.z == 0 || !ONGround)
+        if (_velocity.x <= .05 && _velocity.z <= .05 && _velocity.z >= -.05 && _velocity.x >= -.05 || !ONGround)
         {
             anim.SetFloat("Velocity", 0);
+            anim.speed = 1;
         }
 
         _body.velocity = _velocity;
-        if(_playerInput.x > 0 || _playerInput.y > 0 || _playerInput.x < 0 || _playerInput.y < 0)
+        if (_playerInput.x > 0 || _playerInput.y > 0 || _playerInput.x < 0 || _playerInput.y < 0)
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(_body.velocity.x, 0, _body.velocity.z)), Time.deltaTime * turnSpeed);
 
         ClearState();
+    }
+    void FixWalkingAnim(bool isRunning)
+    {
+        if (isRunning)
+        {
+            anim.SetFloat("Velocity", 1f);
+            if (animatorWalkSpeed < 1f)
+                animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
+
+            anim.speed = 1;
+
+        }
+        else
+        {
+            anim.SetFloat("Velocity", .5f);
+            if (Mathf.Abs(_playerInput.x) > Mathf.Abs(_playerInput.y))
+            {
+                anim.speed = Mathf.Abs(_playerInput.x);
+            }
+            else if (Mathf.Abs(_playerInput.x) < Mathf.Abs(_playerInput.y))
+            {
+                anim.speed = Mathf.Abs(_playerInput.y);
+            }
+            if (animatorWalkSpeed < .5f)
+                animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
+            if (animatorWalkSpeed > .5f)
+                animatorWalkSpeed = .5f;
+        }
     }
     private void ClearState()
     {

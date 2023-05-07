@@ -148,7 +148,6 @@ public abstract class OldPlayerScript : MonoBehaviour
                     }
                     else if (Mathf.Abs(inputVector.x) < Mathf.Abs(inputVector.y))
                     {
-
                         anim.speed = Mathf.Abs(inputVector.y);
                     }
                     if (animatorWalkSpeed < .5f)
