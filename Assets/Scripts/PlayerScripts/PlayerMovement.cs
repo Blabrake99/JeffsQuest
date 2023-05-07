@@ -47,6 +47,7 @@ public class PlayerMovement : MonoBehaviour
     private bool InWater => _submergence > 0f;
     private float _submergence;
     private bool Swimming => _submergence >= swimThreshold;
+    private bool jumping;
     private Animator anim;
     private void OnValidate()
     {
@@ -86,7 +87,7 @@ public class PlayerMovement : MonoBehaviour
             _rightAxis = ProjectDirectionOnPlane(Vector3.right, _upAxis);
             _forwardAxis = ProjectDirectionOnPlane(Vector3.forward, _upAxis);
         }
-        if(ONGround || Swimming)
+        if(ONGround && _body.velocity.y < 0 || Swimming)
         {
             anim.SetBool("Jump", false);
         }
@@ -108,11 +109,18 @@ public class PlayerMovement : MonoBehaviour
         curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
         AdjustVelocity();
 
-        if (_desiredJump > 0.05)
+        if (_desiredJump > 0.05 && !jumping)
         {
-            _desiredJump = 0;
+            anim.SetBool("Jump", true);
             Jump(gravity);
+            jumping = true;
         }
+        if (_desiredJump < .05)
+        {
+
+            jumping = false;
+        }
+
         if (Climbing)
         {
             _velocity -= _contactNormal * (maxClimbAcceleration * 0.9f * Time.deltaTime);
@@ -165,7 +173,6 @@ public class PlayerMovement : MonoBehaviour
     private void Jump(Vector3 gravity)
     {
         Vector3 jumpDirection;
-        anim.SetBool("Jump", true);
         if (ONGround)
         {
             jumpDirection = _contactNormal;
@@ -175,7 +182,7 @@ public class PlayerMovement : MonoBehaviour
             jumpDirection = _steepNormal;
             _jumpPhase = 0;
         }
-        else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
+        else if (maxAirJumps >= 0 && _jumpPhase <= maxAirJumps)
         {
             if (_jumpPhase == 0)
             {

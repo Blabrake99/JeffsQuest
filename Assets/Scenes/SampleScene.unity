@@ -49191,7 +49191,7 @@ MonoBehaviour:
   maxSwimAcceleration: 5
   maxClimbAcceleration: 20
   jumpHeight: 5
-  maxAirJumps: 1
+  maxAirJumps: 0
   maxGroundAngle: 25
   maxStairsAngle: 50
   maxSnapSpeed: 100
