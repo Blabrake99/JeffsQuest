@@ -264,8 +264,9 @@ public abstract class Player : MonoBehaviour, IDamageble
             {
                 if (lastWallHit.layer != 8)
                 {
+                    _velocity.y = 0;
                     jumpDirection = _steepNormal;
-                    jumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * wallJumpHeight);
+                    jumpSpeed = 2 * wallJumpHeight;
                 }
                 else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
                 {
