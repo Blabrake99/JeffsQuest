@@ -49182,7 +49182,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e430689ea31180549a683d967ad2ba39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSpeed: 7.2
+  maxWalkSpeed: 5
+  maxRunSpeed: 8
   maxClimbSpeed: 2
   maxSwimSpeed: 5
   maxAcceleration: 46.6
@@ -49214,6 +49215,10 @@ MonoBehaviour:
   waterDrag: 1
   buoyancy: 1
   swimThreshold: 0.5
+  turnSpeed: 10
+  boneToRotate: {fileID: 0}
+  leftRotation: 0
+  rightRotation: 0
 --- !u!4 &4345657066926797032
 Transform:
   m_ObjectHideFlags: 0

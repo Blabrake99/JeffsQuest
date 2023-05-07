@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     protected PlayerAction actions;
-    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f;
+    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f,maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f;
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")] float maxAcceleration = 10f, maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f;
     [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float jumpHeight = 2f;
     [SerializeField, Range(0, 5), Tooltip("How many jumps the players allowed to do")] int maxAirJumps = 1;
@@ -23,6 +23,11 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField, Range(0f, 10f), Tooltip("Makes movement more sluggesh underwater")] float waterDrag = 1f;
     [SerializeField, Min(0f), Tooltip("the lower the bouyancy the faster it sinks underwater")] float buoyancy = 1f;
     [SerializeField, Range(0.01f, 1f), Tooltip("This defines the minimum submergence required for swimming")] float swimThreshold = 0.5f;
+    [SerializeField, Tooltip("The speed at which he rotates when he moves")] float turnSpeed = 5;
+    [Header("For spine rotation")]
+    [SerializeField] GameObject boneToRotate;
+    [SerializeField] float leftRotation, rightRotation;
+    float curSpeed;
     int jumpPhase;
     private Rigidbody _body, _connectedBody, _previousConnectedBody;
     private Vector3 _playerInput;
@@ -31,7 +36,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 _contactNormal, _steepNormal, _climbNormal, _lastClimbNormal;
     private Vector3 _upAxis, _rightAxis, _forwardAxis;
     private bool _desiresClimbing;
-    private float _desiredJump;
+    private float _desiredJump, _desiredRunning;
     private int _groundContactCount, _steepContactCount, _climbContactCount;
     private bool ONGround => _groundContactCount > 0;
     private bool ONSteep => _steepContactCount > 0;
@@ -42,6 +47,7 @@ public class PlayerMovement : MonoBehaviour
     private bool InWater => _submergence > 0f;
     private float _submergence;
     private bool Swimming => _submergence >= swimThreshold;
+    private Animator anim;
     private void OnValidate()
     {
         _minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
@@ -53,6 +59,7 @@ public class PlayerMovement : MonoBehaviour
     {
         _body = GetComponent<Rigidbody>();
         _body.useGravity = false;
+        anim = GetComponent<Animator>();
         OnValidate();
     }
     void Start()
@@ -67,6 +74,7 @@ public class PlayerMovement : MonoBehaviour
         //playerInput.z = Swimming ? Input.GetAxis("UpDown") : 0f;
         _playerInput = Vector3.ClampMagnitude(_playerInput, 1f);
         _desiredJump = actions.Player.Jump.ReadValue<float>();
+        _desiredRunning = actions.Player.Run.ReadValue<float>();
         if (playerInputSpace)
         {
             _rightAxis = ProjectDirectionOnPlane(playerInputSpace.right, _upAxis);
@@ -78,7 +86,10 @@ public class PlayerMovement : MonoBehaviour
             _rightAxis = ProjectDirectionOnPlane(Vector3.right, _upAxis);
             _forwardAxis = ProjectDirectionOnPlane(Vector3.forward, _upAxis);
         }
-
+        if(ONGround || Swimming)
+        {
+            anim.SetBool("Jump", false);
+        }
         if (Swimming)
         {
             _desiresClimbing = false;
@@ -94,7 +105,7 @@ public class PlayerMovement : MonoBehaviour
         {
             _velocity *= 1f - waterDrag * _submergence * Time.deltaTime;
         }
-
+        curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
         AdjustVelocity();
 
         if (_desiredJump > 0.05)
@@ -124,9 +135,22 @@ public class PlayerMovement : MonoBehaviour
         {
             _velocity += gravity * Time.deltaTime;
         }
+        if(_velocity.x != 0 || _velocity.z != 0)
+        {
+            if (_desiredRunning == 0)
+                anim.SetFloat("Velocity", .5f);
+            else
+                anim.SetFloat("Velocity", 1f);
+        }
+        if (_velocity.x == 0 && _velocity.z == 0 || !ONGround)
+        {
+            anim.SetFloat("Velocity", 0);
+        }
 
         _body.velocity = _velocity;
-        print(_body.velocity.y);
+        if(_playerInput.x > 0 || _playerInput.y > 0 || _playerInput.x < 0 || _playerInput.y < 0)
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(_body.velocity.x, 0, _body.velocity.z)), Time.deltaTime * turnSpeed);
+
         ClearState();
     }
     private void ClearState()
@@ -141,6 +165,7 @@ public class PlayerMovement : MonoBehaviour
     private void Jump(Vector3 gravity)
     {
         Vector3 jumpDirection;
+        anim.SetBool("Jump", true);
         if (ONGround)
         {
             jumpDirection = _contactNormal;
@@ -199,14 +224,14 @@ public class PlayerMovement : MonoBehaviour
         {
             var swimFactor = Mathf.Min(1f, _submergence / swimThreshold);
             acceleration = Mathf.LerpUnclamped(ONGround ? maxAcceleration : maxAirAcceleration, maxSwimAcceleration, swimFactor);
-            speed = Mathf.LerpUnclamped(maxSpeed, maxSwimSpeed, swimFactor);
+            speed = Mathf.LerpUnclamped(curSpeed, maxSwimSpeed, swimFactor);
             xAxis = _rightAxis;
             zAxis = _forwardAxis;
         }
         else
         {
             acceleration = ONGround ? maxAcceleration : maxAirAcceleration;
-            speed = ONGround && _desiresClimbing ? maxClimbSpeed : maxSpeed;
+            speed = ONGround && _desiresClimbing ? maxClimbSpeed : curSpeed;
             xAxis = _rightAxis;
             zAxis = _forwardAxis;
         }
