@@ -122,12 +122,36 @@ public abstract class Player : MonoBehaviour, IDamageble
     {
         var gravity = CustomGravity.GetGravity(_body.position, out _upAxis);
         UpdateState();
-
         if (InWater)
         {
             _velocity *= 1f - waterDrag * _submergence * Time.deltaTime;
         }
-        curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
+        if (Gamepad.all.Count > 0)
+        {
+            if(_playerInput.x > .7f || _playerInput.y > .7f ||
+                _playerInput.x < -.7f || _playerInput.y < -.7f)
+            {
+                curSpeed = maxRunSpeed;
+                anim.SetFloat("Velocity", 1f);
+            }
+            if (_playerInput.x <= .7f && _playerInput.y <= .7f &&
+                _playerInput.x >= -.7f && _playerInput.y >= -.7f)
+            {
+                curSpeed = maxWalkSpeed;
+                anim.SetFloat("Velocity", .5f);
+            }
+        }
+        else
+        {
+            curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
+            if (_velocity.x != 0 || _velocity.z != 0)
+            {
+                if (_desiredRunning == 0)
+                    anim.SetFloat("Velocity", .5f);
+                else
+                    anim.SetFloat("Velocity", 1f);
+            }
+        }
         AdjustVelocity();
 
         if (_desiredJump > 0.05 && !jumping)
@@ -163,13 +187,6 @@ public abstract class Player : MonoBehaviour, IDamageble
         else
         {
             _velocity += gravity * Time.deltaTime;
-        }
-        if(_velocity.x != 0 || _velocity.z != 0)
-        {
-            if (_desiredRunning == 0)
-                anim.SetFloat("Velocity", .5f);
-            else
-                anim.SetFloat("Velocity", 1f);
         }
         if (_velocity.x == 0 && _velocity.z == 0 || !ONGround)
         {

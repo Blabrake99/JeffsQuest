@@ -343,17 +343,6 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""8df0b822-02da-4da9-9e1a-da07aaae9121"",
-                    ""path"": ""<Gamepad>/buttonEast"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Run"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""fffce55a-9242-49d5-99b8-91d7577657c4"",
                     ""path"": ""<Keyboard>/escape"",
                     ""interactions"": """",
