@@ -532,23 +532,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8d39c9a956229f4f92c60d2e4484a67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _camera: {fileID: 963194227}
-  _target: {fileID: 3991549056075789435}
-  _framing: {x: 0, y: 0}
-  _zoomSpeed: 0.1
-  _defaultDistance: 5
-  _minDistance: 0
-  _maxDistance: 10
-  _invertX: 0
-  _invertY: 0
-  _RotationSharpness: 25
-  _defaultVerticalAngle: 20
-  _minVerticalAngle: -90
-  _maxVerticalAngle: 90
-  _checkRadius: 0.2
-  _obstructionLayers:
+  focus: {fileID: 3991549056075789435}
+  distance: 5
+  zoomSpeed: 10
+  focusRadius: 1
+  focusCentering: 0.5
+  rotationSpeed: 90
+  minVerticalAngle: -30
+  maxVerticalAngle: 60
+  alignDelay: 5
+  alignSmoothRange: 45
+  obstructionMask:
     serializedVersion: 2
-    m_Bits: 63
+    m_Bits: 11
 --- !u!1 &1096771814
 GameObject:
   m_ObjectHideFlags: 0
@@ -561,7 +557,7 @@ GameObject:
   - component: {fileID: 1096771817}
   - component: {fileID: 1096771816}
   - component: {fileID: 1096771815}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1888,7 +1884,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4336689482276351681}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.17226839, y: 0.15, z: -0.76297665}
+  m_LocalPosition: {x: 0.17226839, y: 0.93, z: -0.76297665}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2055,6 +2051,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3991549056075789435}
   - component: {fileID: 4336689482276351682}
+  - component: {fileID: 4336689482276351689}
   - component: {fileID: 4336689482276351687}
   - component: {fileID: 4336689482276351686}
   - component: {fileID: 4336689482276351685}
@@ -2075,7 +2072,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4336689482276351681}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 11d273a1a4b204a4b9806cee2ecbef40, type: 3}
   m_Name: 
@@ -2085,7 +2082,7 @@ MonoBehaviour:
   damageCooldown: 1
   jumpHeight: 7
   turnSpeed: 15
-  wallJumpForce: 20
+  wallJumpForce: 60
   wallJumpHeight: 8
   maxWalkSpeed: 5
   maxRunSpeed: 14
@@ -2102,7 +2099,7 @@ MonoBehaviour:
   animatorWalkdeceleration: 5
   crouchacceration: 1
   crouchdecleration: 2
-  jumpAmount: 1
+  jumpAmount: 2
   mask:
     serializedVersion: 2
     m_Bits: 8
@@ -2214,6 +2211,50 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
+--- !u!114 &4336689482276351689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4336689482276351681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e430689ea31180549a683d967ad2ba39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxSpeed: 10
+  maxClimbSpeed: 2
+  maxSwimSpeed: 5
+  maxAcceleration: 10
+  maxAirAcceleration: 1
+  maxSwimAcceleration: 5
+  maxClimbAcceleration: 20
+  jumpHeight: 5
+  maxAirJumps: 1
+  maxGroundAngle: 25
+  maxStairsAngle: 50
+  maxSnapSpeed: 100
+  probeDistance: 1
+  probeMask:
+    serializedVersion: 2
+    m_Bits: 9
+  stairsMask:
+    serializedVersion: 2
+    m_Bits: 0
+  waterMask:
+    serializedVersion: 2
+    m_Bits: 16
+  climbMask:
+    serializedVersion: 2
+    m_Bits: 0
+  playerInputSpace: {fileID: 963194228}
+  submergenceOffset: 0.5
+  maxClimbingAngle: 140
+  submergenceRange: 1
+  waterDrag: 1
+  buoyancy: 1
+  swimThreshold: 0.5
 --- !u!4 &4345657066926797032
 Transform:
   m_ObjectHideFlags: 0
