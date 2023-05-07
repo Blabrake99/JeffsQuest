@@ -16,12 +16,15 @@ public class CameraScript : MonoBehaviour
     [SerializeField, Min(0f)] float alignDelay = 5f;
     [SerializeField, Range(0f, 90f)] float alignSmoothRange = 45f;
     [SerializeField, Tooltip("The layers that collide with the camera")] LayerMask obstructionMask = -1;
+    [SerializeField, Tooltip("How the fast the camera accelerates or decelerates")] float cameraAcceleration = .5f, cameraDeceleration = .5f;
+    public float speed;
     Camera regularCamera;
     Vector2 orbitAngles = new Vector2(45f, 0f);
     Vector3 focusPoint, previousFocusPoint;
     float lastManualRotationTime;
     Quaternion orbitRotation;
     Quaternion gravityAlignment = Quaternion.identity;
+    Vector2 input;
     void OnValidate()
     {
         if (maxVerticalAngle < minVerticalAngle)
@@ -48,6 +51,15 @@ public class CameraScript : MonoBehaviour
             ConstrainAngles();
             orbitRotation = Quaternion.Euler(orbitAngles);
         }
+        if(input.x > 0f || input.x < 0 ||
+            input.y > 0f || input.y < 0)
+        {
+            speed = Mathf.Lerp(speed, rotationSpeed, Time.deltaTime * cameraAcceleration);
+        }
+        if(input.x == 0 && input.y == 0 && speed > 0.01)
+        {
+            speed = Mathf.Lerp(speed, 0, Time.deltaTime * cameraDeceleration);
+        }
         Quaternion lookRotation = gravityAlignment * orbitRotation;
         Vector3 lookDirection = lookRotation * Vector3.forward;
         Vector3 lookPosition = focusPoint - lookDirection * distance;
@@ -67,12 +79,12 @@ public class CameraScript : MonoBehaviour
     }
     bool ManualRotation()
     {
-        Vector2 input = new Vector2(actions.Player.Camera.ReadValue<Vector2>().y,
+        input = new Vector2(actions.Player.Camera.ReadValue<Vector2>().y,
             actions.Player.Camera.ReadValue<Vector2>().x);
         const float e = 0.001f;
         if (input.x < -e || input.x > e || input.y < -e || input.y > e)
         {
-            orbitAngles += rotationSpeed * Time.unscaledDeltaTime * input;
+            orbitAngles += speed * Time.unscaledDeltaTime * input;
             lastManualRotationTime = Time.unscaledTime;
             return true;
         }
@@ -106,7 +118,7 @@ public class CameraScript : MonoBehaviour
         }
         float headingAngle = GetAngle(movement / Mathf.Sqrt(movementDeltaSqr));
         float deltaAbs = Mathf.Abs(Mathf.DeltaAngle(orbitAngles.y, headingAngle));
-        float rotationChange = rotationSpeed * Mathf.Min(Time.unscaledDeltaTime, movementDeltaSqr);
+        float rotationChange = speed * Mathf.Min(Time.unscaledDeltaTime, movementDeltaSqr);
         if (deltaAbs < alignSmoothRange)
         {
             rotationChange *= deltaAbs / alignSmoothRange;

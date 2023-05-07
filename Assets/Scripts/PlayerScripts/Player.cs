@@ -28,7 +28,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Range(0.01f, 1f), Tooltip("This defines the minimum submergence required for swimming")] float swimThreshold = 0.5f;
     [SerializeField, Tooltip("The speed at which he rotates when he moves")] float turnSpeed = 5;
     [Header("For spine rotation")]
-    [SerializeField] GameObject boneToRotate;
+    [SerializeField] Transform boneToRotate;
     [SerializeField] float leftRotation, rightRotation;
     [HideInInspector] public Vector3 RespawnPoint;
     protected float curSpeed;
@@ -205,7 +205,9 @@ public abstract class Player : MonoBehaviour, IDamageble
 
         _body.velocity = _velocity;
         if (_playerInput.x > 0 || _playerInput.y > 0 || _playerInput.x < 0 || _playerInput.y < 0)
+        {
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(_body.velocity.x, 0, _body.velocity.z)), Time.deltaTime * turnSpeed);
+        }
 
         ClearState();
     }

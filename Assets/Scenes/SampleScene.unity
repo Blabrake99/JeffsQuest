@@ -1404,7 +1404,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-11844
+  m_Name: pb_Mesh50418
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2398,7 +2398,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-12682
+  m_Name: pb_Mesh50536
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2608,7 +2608,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-9282
+  m_Name: pb_Mesh50584
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -7562,7 +7562,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-13582
+  m_Name: pb_Mesh50476
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -7726,7 +7726,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-8038
+  m_Name: pb_Mesh50380
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -8324,7 +8324,8 @@ MonoBehaviour:
   zoomSpeed: 10
   focusRadius: 1
   focusCentering: 0.5
-  rotationSpeed: 142
+  rotationSpeedX: 90
+  rotationSpeedY: 90
   minVerticalAngle: 5.4
   maxVerticalAngle: 60
   alignDelay: 5
@@ -8332,6 +8333,9 @@ MonoBehaviour:
   obstructionMask:
     serializedVersion: 2
     m_Bits: 11
+  cameraAcceleration: 1
+  cameraDeceleration: 10
+  speed: 0
 --- !u!1 &970650112
 GameObject:
   m_ObjectHideFlags: 0
@@ -43133,7 +43137,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-8980
+  m_Name: pb_Mesh50618
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -43297,7 +43301,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-14136
+  m_Name: pb_Mesh50570
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -45694,7 +45698,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-10724
+  m_Name: pb_Mesh50522
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -45987,7 +45991,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-9430
+  m_Name: pb_Mesh50364
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -46151,7 +46155,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-9150
+  m_Name: pb_Mesh50648
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -46659,7 +46663,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-8400
+  m_Name: pb_Mesh50462
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -46920,7 +46924,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-11422
+  m_Name: pb_Mesh50432
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -47084,7 +47088,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-10012
+  m_Name: pb_Mesh50350
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -47592,7 +47596,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-11590
+  m_Name: pb_Mesh50494
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -47756,7 +47760,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-11140
+  m_Name: pb_Mesh50404
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -49224,9 +49228,9 @@ MonoBehaviour:
   buoyancy: 1
   swimThreshold: 0.5
   turnSpeed: 20
-  boneToRotate: {fileID: 4426216975577121280}
-  leftRotation: 0
-  rightRotation: 0
+  boneToRotate: {fileID: 2277609869545846108}
+  leftRotation: -120.6
+  rightRotation: -70.1
   RespawnPoint: {x: 0, y: 0, z: 0}
 --- !u!4 &4345657066926797032
 Transform:
