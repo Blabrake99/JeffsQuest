@@ -16,7 +16,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     float maxGroundAngle = 25f, maxStairsAngle = 50f;
     [SerializeField, Range(0f, 100f)] float maxSnapSpeed = 100f;
     [SerializeField, Min(0f), Tooltip("This is a raycast distance for below the player")] float probeDistance = 1f;
-    [SerializeField, Tooltip("The layermasks for their respective names")] LayerMask probeMask = -1, stairsMask = -1, waterMask = 0, climbMask = -1;
+    [SerializeField, Tooltip("The layermasks for their respective names")] LayerMask probeMask = -1, stairsMask = -1, waterMask = 0, climbMask = -1, noneJumpableMask;
     [SerializeField, Tooltip("The Transform of the camera")] Transform playerInputSpace = default;
     [SerializeField, Tooltip("THe offset of water o nthe player. the higher the number the lower jeff will be in the water" +
         "befor he's at the top")]
@@ -39,6 +39,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected Vector3 _connectionWorldPosition, _connectionLocalPosition;
     protected Vector3 _contactNormal, _steepNormal, _climbNormal, _lastClimbNormal;
     protected Vector3 _upAxis, _rightAxis, _forwardAxis;
+    protected GameObject lastWallHit;
     protected bool _desiresClimbing;
     protected float _desiredJump, _desiredRunning;
     protected int _groundContactCount, _steepContactCount, _climbContactCount;
@@ -247,14 +248,35 @@ public abstract class Player : MonoBehaviour, IDamageble
     }
     private void Jump(Vector3 gravity)
     {
-        Vector3 jumpDirection;
+        Vector3 jumpDirection = Vector3.up;
         if (ONGround)
         {
             jumpDirection = _contactNormal;
         }
         else if (ONSteep)
         {
-            jumpDirection = _steepNormal;
+            if (lastWallHit == null)
+            {
+                jumpDirection = _steepNormal;
+            }
+            else
+            {
+                if (lastWallHit.layer != 8)
+                {
+                    jumpDirection = _steepNormal;
+                }
+                else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
+                {
+
+                    if (_jumpPhase == 0)
+                    {
+                        _jumpPhase = 1;
+                    }
+                    jumpDirection = Vector3.up;
+                }
+                else
+                    return;
+            }
             _jumpPhase = 0;
         }
         else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
@@ -265,6 +287,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             }
 
             jumpDirection = _contactNormal;
+
         }
         else
         {
@@ -560,6 +583,7 @@ public abstract class Player : MonoBehaviour, IDamageble
 
             if (upDot >= minDot)
             {
+                lastWallHit = null;
                 _groundContactCount += 1;
                 _contactNormal += normal;
                 _connectedBody = collision.rigidbody;
@@ -568,6 +592,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             {
                 if (upDot > -0.01f)
                 {
+                    lastWallHit = collision.gameObject;
                     _steepContactCount += 1;
                     _steepNormal += normal;
                     if (_groundContactCount == 0)

@@ -42997,7 +42997,7 @@ GameObject:
   - component: {fileID: 1096771817}
   - component: {fileID: 1096771816}
   - component: {fileID: 1096771815}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -49192,6 +49192,8 @@ MonoBehaviour:
   maxAirAcceleration: 18.9
   maxSwimAcceleration: 5
   maxClimbAcceleration: 20
+  animatorWalkAcceleration: 0.2
+  animatorWalkdeceleration: 0.5
   jumpHeight: 5
   maxAirJumps: 0
   maxGroundAngle: 25
@@ -49210,6 +49212,9 @@ MonoBehaviour:
   climbMask:
     serializedVersion: 2
     m_Bits: 0
+  noneJumpableMask:
+    serializedVersion: 2
+    m_Bits: 256
   playerInputSpace: {fileID: 963194228}
   submergenceOffset: 0.5
   maxClimbingAngle: 140
