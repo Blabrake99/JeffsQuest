@@ -10,7 +10,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")]
     float maxAcceleration = 10f, maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f
         , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f;
-    [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float jumpHeight = 2f;
+    [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float jumpHeight = 2f, wallJumpHeight = 6;
     [SerializeField, Range(0, 5), Tooltip("How many jumps the players allowed to do")] int maxAirJumps = 1;
     [SerializeField, Range(0f, 90f), Tooltip("This is the max ground angle to tell if the players Grounded or not")]
     float maxGroundAngle = 25f, maxStairsAngle = 50f;
@@ -249,6 +249,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     private void Jump(Vector3 gravity)
     {
         Vector3 jumpDirection = Vector3.up;
+        var jumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
         if (ONGround)
         {
             jumpDirection = _contactNormal;
@@ -264,6 +265,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                 if (lastWallHit.layer != 8)
                 {
                     jumpDirection = _steepNormal;
+                    jumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * wallJumpHeight);
                 }
                 else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
                 {
@@ -296,7 +298,7 @@ public abstract class Player : MonoBehaviour, IDamageble
 
         _stepsSinceLastJump = 0;
         _jumpPhase += 1;
-        var jumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
+
         if (InWater)
         {
             jumpSpeed *= Mathf.Max(0f, 1f - _submergence / swimThreshold);

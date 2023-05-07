@@ -43076,7 +43076,7 @@ Transform:
   m_GameObject: {fileID: 1096771814}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 12.59, y: 1.33, z: 0}
-  m_LocalScale: {x: 1, y: 6, z: 6}
+  m_LocalScale: {x: 1, y: 20, z: 6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -49195,6 +49195,7 @@ MonoBehaviour:
   animatorWalkAcceleration: 0.2
   animatorWalkdeceleration: 0.5
   jumpHeight: 5
+  wallJumpHeight: 7
   maxAirJumps: 0
   maxGroundAngle: 25
   maxStairsAngle: 50
