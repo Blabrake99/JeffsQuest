@@ -1,57 +1,64 @@
-using UnityEngine;
-using UnityEngine.InputSystem;
 using System.Collections;
 using System.Collections.Generic;
-
+using UnityEngine;
+using UnityEngine.InputSystem;
 public abstract class Player : MonoBehaviour, IDamageble
 {
-    [Header("For Combat")]
-    [SerializeField, Tooltip("Players health")] protected int health;
-    [SerializeField, Tooltip("Players attack damage")] protected int damage;
+    [SerializeField, Tooltip("Players health")] protected int health = 6;
     [SerializeField, Tooltip("Players IFrames")] protected float damageCooldown;
-
-    [Header("For Movement")]
-    [SerializeField, Tooltip("How high the player jumps")] protected float jumpHeight;
-    [SerializeField] protected float turnSpeed = 2f, wallJumpForce = 5, wallJumpHeight = 7;
-    [SerializeField, Range(1, 15f)] protected float maxWalkSpeed = 5, maxRunSpeed = 7, maxAirSpeed = 1f, maxCrouchSpeed = 3, longJumpXZForce
-        , longJumpYForce;
-    [SerializeField, Range(.1f, 5f)]
-    protected float walkAccelerationSpeed, runAccelerationSpeed, decelerationSpeed, airAcceleration, airDecelerationSpeed
-        , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f, crouchacceration = .2f, crouchdecleration = .5f;
-    [SerializeField, Tooltip("Players jump count")] protected int jumpAmount;
-    protected int startHealth;
-    protected float damagedTimer, justjumpedTimer, distToGround;
-    protected bool isInteracting, isNearWall;
-    protected PlayerAction actions;
-    protected int currentAmountOfJumps;
-    protected Collider coll;
-    protected Vector3 lastRelativeMovement;
-    protected float speed, animatorWalkSpeed;
-    protected Rigidbody rb;
-    protected Animator anim;
-    [Header("Pat Don't touch")]
-    [SerializeField, Tooltip("Ground check mask")] protected LayerMask mask;
-    [SerializeField, Tooltip("The object at the bottom of the player")] protected Transform groundCheck;
-    [SerializeField, Tooltip("The Main Camera")] Camera CurrentCamera;
-    private Vector3 wallJumpDir;
-    public int Health { get { return health; } set { health = value; } }
-    //protected HealthBar bar;
-    protected bool isRunning, inWater, isCrouching, isLongJumping;
+    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f,maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f;
+    [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")] float maxAcceleration = 10f, maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f;
+    [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float jumpHeight = 2f;
+    [SerializeField, Range(0, 5), Tooltip("How many jumps the players allowed to do")] int maxAirJumps = 1;
+    [SerializeField, Range(0f, 90f), Tooltip("This is the max ground angle to tell if the players Grounded or not")]
+    float maxGroundAngle = 25f, maxStairsAngle = 50f;
+    [SerializeField, Range(0f, 100f)] float maxSnapSpeed = 100f;
+    [SerializeField, Min(0f), Tooltip("This is a raycast distance for below the player")] float probeDistance = 1f;
+    [SerializeField, Tooltip("The layermasks for their respective names")] LayerMask probeMask = -1, stairsMask = -1, waterMask = 0, climbMask = -1;
+    [SerializeField, Tooltip("The Transform of the camera")] Transform playerInputSpace = default;
+    [SerializeField, Tooltip("THe offset of water o nthe player. the higher the number the lower jeff will be in the water" +
+        "befor he's at the top")]
+    float submergenceOffset = 0.5f;
+    [SerializeField, Range(90f, 170f)] private float maxClimbingAngle = 140f;
+    [SerializeField, Min(0.1f), Tooltip("This is for detecting when the player is fully submerged")] float submergenceRange = 1f;
+    [SerializeField, Range(0f, 10f), Tooltip("Makes movement more sluggesh underwater")] float waterDrag = 1f;
+    [SerializeField, Min(0f), Tooltip("the lower the bouyancy the faster it sinks underwater")] float buoyancy = 1f;
+    [SerializeField, Range(0.01f, 1f), Tooltip("This defines the minimum submergence required for swimming")] float swimThreshold = 0.5f;
+    [SerializeField, Tooltip("The speed at which he rotates when he moves")] float turnSpeed = 5;
+    [Header("For spine rotation")]
+    [SerializeField] GameObject boneToRotate;
+    [SerializeField] float leftRotation, rightRotation;
     [HideInInspector] public Vector3 RespawnPoint;
-    protected void Start()
+    protected float curSpeed;
+    protected int jumpPhase;
+    protected Rigidbody _body, _connectedBody, _previousConnectedBody;
+    protected Vector3 _playerInput;
+    protected Vector3 _velocity, _connectionVelocity;
+    protected Vector3 _connectionWorldPosition, _connectionLocalPosition;
+    protected Vector3 _contactNormal, _steepNormal, _climbNormal, _lastClimbNormal;
+    protected Vector3 _upAxis, _rightAxis, _forwardAxis;
+    protected bool _desiresClimbing;
+    protected float _desiredJump, _desiredRunning;
+    protected int _groundContactCount, _steepContactCount, _climbContactCount;
+    protected bool ONGround => _groundContactCount > 0;
+    protected bool ONSteep => _steepContactCount > 0;
+    protected bool Climbing => _climbContactCount > 0 && _stepsSinceLastJump > 2;
+    protected int _jumpPhase;
+    protected float _minGroundDotProduct, _minStairsDotProduct, _minClimbDotProduct;
+    protected int _stepsSinceLastGrounded, _stepsSinceLastJump;
+    protected bool InWater => _submergence > 0f;
+    protected float _submergence, damagedTimer;
+    protected bool Swimming => _submergence >= swimThreshold;
+    protected bool jumping, isInteracting;
+    protected Animator anim;
+    protected int startHealth;
+    protected PlayerAction actions;
+    public int Health { get { return health; } set { health = value; } }
+    private void OnValidate()
     {
-        rb = GetComponent<Rigidbody>();
-
-        startHealth = health;
-        RespawnPoint = transform.position;
-        anim = GetComponent<Animator>();
-        coll = GetComponent<Collider>();
-        distToGround = coll.bounds.extents.y;
-        actions = new PlayerAction();
-        actions.Player.Enable();
-        actions.Player.Jump.performed += OnJump;
-        actions.Player.Interact.performed += OnInteract;
-        actions.Player.Fire.performed += OnFire;
+        _minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
+        _minStairsDotProduct = Mathf.Cos(maxStairsAngle * Mathf.Deg2Rad);
+        _minClimbDotProduct = Mathf.Cos(maxClimbingAngle * Mathf.Deg2Rad);
     }
     public void Damage(int amount)
     {
@@ -66,139 +73,241 @@ public abstract class Player : MonoBehaviour, IDamageble
             Respawn();
         }
     }
+    protected void Awake()
+    {
+        _body = GetComponent<Rigidbody>();
+        _body.useGravity = false;
+        anim = GetComponent<Animator>();
+        OnValidate();
+    }
+    protected void Start()
+    {
+        startHealth = health;
+        RespawnPoint = transform.position;
+        OnValidate();
+        actions = new PlayerAction();
+        actions.Player.Enable();
+    }
     protected void Update()
     {
-        if (actions.Player.Run.ReadValue<float>() > 0 && !isCrouching)
+        _playerInput = actions.Player.Move.ReadValue<Vector2>();
+        //playerInput.z = Swimming ? Input.GetAxis("UpDown") : 0f;
+        _playerInput = Vector3.ClampMagnitude(_playerInput, 1f);
+        _desiredJump = actions.Player.Jump.ReadValue<float>();
+        _desiredRunning = actions.Player.Run.ReadValue<float>();
+        if (playerInputSpace)
         {
-            isRunning = true;
+            _rightAxis = ProjectDirectionOnPlane(playerInputSpace.right, _upAxis);
+            _forwardAxis =
+                ProjectDirectionOnPlane(playerInputSpace.forward, _upAxis);
         }
         else
         {
-            isRunning = false;
+            _rightAxis = ProjectDirectionOnPlane(Vector3.right, _upAxis);
+            _forwardAxis = ProjectDirectionOnPlane(Vector3.forward, _upAxis);
         }
-        if (actions.Player.Crouch.ReadValue<float>() > 0 && IsGrounded())
+        if(ONGround && _body.velocity.y < 0 || Swimming)
         {
-            if (speed <= maxWalkSpeed)
-            {
-                isLongJumping = false;
-                anim.SetBool("Crouch", true);
-                isCrouching = true;
-            }
-            else
-            {
-                print("Longjumping");
-                isLongJumping = true;
-            }
+            anim.SetBool("Jump", false);
         }
-        if(actions.Player.Crouch.ReadValue<float>() <= 0 || !IsGrounded())
+        if (Swimming)
         {
-            isCrouching = false;
-            anim.SetBool("Crouch", false);
+            _desiresClimbing = false;
         }
         if (damagedTimer > 0)
             damagedTimer -= Time.deltaTime;
-        if (justjumpedTimer > 0)
-            justjumpedTimer -= Time.deltaTime;
     }
+
     protected void FixedUpdate()
     {
-        //Gets movement input
-        Vector2 inputVector = actions.Player.Move.ReadValue<Vector2>();
-        //getting camera direction
-        Vector3 forward = CurrentCamera.transform.forward;
-        Vector3 right = CurrentCamera.transform.right;
-        forward.y = 0;
-        right.y = 0;
-        //normalizing vectors 
-        forward = forward.normalized;
-        right = right.normalized;
-        Vector3 forwardRelativeInput = inputVector.y * forward;
-        Vector3 rightRelativeInput = inputVector.x * right;
-        Vector3 cameraRelativeMovement = forwardRelativeInput + rightRelativeInput;
-        if (cameraRelativeMovement != Vector3.zero)
-            lastRelativeMovement = cameraRelativeMovement;
+        var gravity = CustomGravity.GetGravity(_body.position, out _upAxis);
+        UpdateState();
 
-
-        if (IsGrounded())
+        if (InWater)
         {
-            anim.SetBool("Jump", false);
-            if (inputVector != Vector2.zero)
-            {
-                if (!isCrouching)
-                {
-                    speed = (isRunning) ? Mathf.Lerp(speed, maxRunSpeed, Time.deltaTime * runAccelerationSpeed) : Mathf.Lerp(speed, maxWalkSpeed, Time.deltaTime * walkAccelerationSpeed);
-                }
-                else
-                {
-                    speed = Mathf.Lerp(speed, maxCrouchSpeed, Time.deltaTime * crouchacceration);
-                }
-                if (isRunning)
-                {
-                    if (animatorWalkSpeed < 1f)
-                        animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
+            _velocity *= 1f - waterDrag * _submergence * Time.deltaTime;
+        }
+        curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
+        AdjustVelocity();
 
-                    anim.speed = 1;
-                }
-                else
-                {
+        if (_desiredJump > 0.05 && !jumping)
+        {
+            anim.SetBool("Jump", true);
+            Jump(gravity);
+            jumping = true;
+        }
+        if (_desiredJump < .05)
+        {
 
-                    if (Mathf.Abs(inputVector.x) > Mathf.Abs(inputVector.y))
-                    {
-                        anim.speed = Mathf.Abs(inputVector.x);
-                    }
-                    else if (Mathf.Abs(inputVector.x) < Mathf.Abs(inputVector.y))
-                    {
+            jumping = false;
+        }
 
-                        anim.speed = Mathf.Abs(inputVector.y);
-                    }
-                    if (animatorWalkSpeed < .5f)
-                        animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
-                    if (animatorWalkSpeed > .5f)
-                        animatorWalkSpeed = .5f;
-                }
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(cameraRelativeMovement), Time.deltaTime * turnSpeed);
-                rb.velocity = new Vector3(cameraRelativeMovement.x * speed, rb.velocity.y, cameraRelativeMovement.z * speed);
-            }
-            else
-            {
-                anim.speed = 1;
-                if (rb.velocity.x > .01f && rb.velocity.z > .01f)
-                {
-                    if (!isLongJumping)
-                    {
-                        speed = (isCrouching) ? Mathf.Lerp(speed, 0, Time.deltaTime * crouchdecleration) : Mathf.Lerp(speed, 0, Time.deltaTime * decelerationSpeed);
-                        rb.velocity = new Vector3(lastRelativeMovement.x * speed, rb.velocity.y, lastRelativeMovement.z * speed);
-                    }
-                    else
-                    {
-                        rb.AddForce(Vector3.up * longJumpYForce, ForceMode.Impulse);
-                        rb.AddForce(Vector3.forward * longJumpXZForce, ForceMode.Impulse);
-                        isLongJumping = false;
-                    }
-                }
-                if (animatorWalkSpeed > 0)
-                {
-                    animatorWalkSpeed -= animatorWalkdeceleration * Time.deltaTime;
-                }
-                else
-                {
-                    animatorWalkSpeed = 0;
-                }
-            }
-
-            anim.SetFloat("Velocity", animatorWalkSpeed);
-            currentAmountOfJumps = 1;
+        if (Climbing)
+        {
+            _velocity -= _contactNormal * (maxClimbAcceleration * 0.9f * Time.deltaTime);
+        }
+        else if (InWater)
+        {
+            _velocity += gravity * ((1f - buoyancy * _submergence) * Time.deltaTime);
+        }
+        else if (ONGround && _velocity.sqrMagnitude < 0.01f)
+        {
+            _velocity +=
+                _contactNormal *
+                (Vector3.Dot(gravity, _contactNormal) * Time.deltaTime);
+        }
+        else if (_desiresClimbing && ONGround)
+        {
+            _velocity += (gravity - _contactNormal * (maxClimbAcceleration * 0.9f)) * Time.deltaTime;
         }
         else
         {
-            anim.speed = 1;
-            anim.SetFloat("Velocity", 0);
-            if (inputVector != Vector2.zero)
-            {
-                speed = (speed < maxAirSpeed) ? Mathf.Lerp(speed, maxAirSpeed, Time.deltaTime * airAcceleration) : Mathf.Lerp(speed, maxAirSpeed, Time.deltaTime * airDecelerationSpeed);
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lastRelativeMovement), Time.deltaTime * turnSpeed);
-            }
+            _velocity += gravity * Time.deltaTime;
         }
+        if(_velocity.x != 0 || _velocity.z != 0)
+        {
+            if (_desiredRunning == 0)
+                anim.SetFloat("Velocity", .5f);
+            else
+                anim.SetFloat("Velocity", 1f);
+        }
+        if (_velocity.x == 0 && _velocity.z == 0 || !ONGround)
+        {
+            anim.SetFloat("Velocity", 0);
+        }
+
+        _body.velocity = _velocity;
+        if(_playerInput.x > 0 || _playerInput.y > 0 || _playerInput.x < 0 || _playerInput.y < 0)
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(_body.velocity.x, 0, _body.velocity.z)), Time.deltaTime * turnSpeed);
+
+        ClearState();
+    }
+    private void ClearState()
+    {
+        _groundContactCount = _steepContactCount = _climbContactCount = 0;
+        _contactNormal = _steepNormal = _climbNormal = Vector3.zero;
+        _connectionVelocity = Vector3.zero;
+        _previousConnectedBody = _connectedBody;
+        _connectedBody = null;
+        _submergence = 0f;
+    }
+    private void Jump(Vector3 gravity)
+    {
+        Vector3 jumpDirection;
+        if (ONGround)
+        {
+            jumpDirection = _contactNormal;
+        }
+        else if (ONSteep)
+        {
+            jumpDirection = _steepNormal;
+            _jumpPhase = 0;
+        }
+        else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
+        {
+            if (_jumpPhase == 0)
+            {
+                _jumpPhase = 1;
+            }
+
+            jumpDirection = _contactNormal;
+        }
+        else
+        {
+            return;
+        }
+
+        _stepsSinceLastJump = 0;
+        _jumpPhase += 1;
+        var jumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
+        if (InWater)
+        {
+            jumpSpeed *= Mathf.Max(0f, 1f - _submergence / swimThreshold);
+        }
+        jumpDirection = (jumpDirection + _upAxis).normalized;
+        var alignedSpeed = Vector3.Dot(_velocity, jumpDirection);
+        if (alignedSpeed > 0f)
+        {
+            jumpSpeed = Mathf.Max(jumpSpeed - _velocity.y, 0f);
+        }
+
+        _velocity += jumpDirection * jumpSpeed;
+    }
+    Vector3 ProjectDirectionOnPlane(Vector3 direction, Vector3 normal)
+    {
+        return (direction - normal * Vector3.Dot(direction, normal)).normalized;
+    }
+    private void AdjustVelocity()
+    {
+        float acceleration, speed;
+        Vector3 xAxis, zAxis;
+        if (Climbing)
+        {
+            acceleration = maxClimbAcceleration;
+            speed = maxClimbSpeed;
+            xAxis = Vector3.Cross(_contactNormal, _upAxis);
+            zAxis = _upAxis;
+        }
+        else if (InWater)
+        {
+            var swimFactor = Mathf.Min(1f, _submergence / swimThreshold);
+            acceleration = Mathf.LerpUnclamped(ONGround ? maxAcceleration : maxAirAcceleration, maxSwimAcceleration, swimFactor);
+            speed = Mathf.LerpUnclamped(curSpeed, maxSwimSpeed, swimFactor);
+            xAxis = _rightAxis;
+            zAxis = _forwardAxis;
+        }
+        else
+        {
+            acceleration = ONGround ? maxAcceleration : maxAirAcceleration;
+            speed = ONGround && _desiresClimbing ? maxClimbSpeed : curSpeed;
+            xAxis = _rightAxis;
+            zAxis = _forwardAxis;
+        }
+
+        xAxis = ProjectDirectionOnPlane(xAxis, _contactNormal);
+        zAxis = ProjectDirectionOnPlane(zAxis, _contactNormal);
+
+        var relativeVelocity = _velocity - _connectionVelocity;
+        var currentX = Vector3.Dot(relativeVelocity, xAxis);
+        var currentZ = Vector3.Dot(relativeVelocity, zAxis);
+
+        var maxSpeedChange = acceleration * Time.deltaTime;
+
+        var newX = Mathf.MoveTowards(currentX, _playerInput.x * speed, maxSpeedChange);
+        var newZ = Mathf.MoveTowards(currentZ, _playerInput.y * speed, maxSpeedChange);
+
+        _velocity += xAxis * (newX - currentX) + zAxis * (newZ - currentZ);
+
+        if (Swimming)
+        {
+            var currentY = Vector3.Dot(relativeVelocity, _upAxis);
+            var newY = Mathf.MoveTowards(currentY, _playerInput.z * speed, maxSpeedChange);
+            _velocity += _upAxis * (newY - currentY);
+        }
+    }
+    public bool MaxHealth()
+    {
+        if (health == startHealth)
+            return true;
+        else
+        {
+            return false;
+        }
+    }
+    public void GainHealth(int amount)
+    {
+        if (health + amount > startHealth)
+            health = startHealth;
+        else
+        {
+            health += startHealth;
+        }
+    }
+    public void Respawn()
+    {
+        Health = startHealth;
+        //bar.SetHealth(Health);
+        transform.position = RespawnPoint;
     }
     public void OnInteract(InputAction.CallbackContext context)
     {
@@ -228,77 +337,217 @@ public abstract class Player : MonoBehaviour, IDamageble
         yield return new WaitForSeconds(.5f);
         isInteracting = false;
     }
-    public void OnJump(InputAction.CallbackContext context)
+    private void UpdateState()
     {
-        if (context.performed)
+        _stepsSinceLastGrounded += 1;
+        _stepsSinceLastJump += 1;
+        _velocity = _body.velocity;
+        if (CheckClimbing() || CheckSwimming() || ONGround || SnapToGround() || CheckSteepContacts())
         {
-            if (currentAmountOfJumps <= jumpAmount)
-            {
-                anim.SetBool("Jump", true);
-                rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-                rb.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse);
-                justjumpedTimer = .1f;
-                currentAmountOfJumps++;
-            }
-            if (wallJumpDir != Vector3.zero)
-            {
-                rb.AddForce(new Vector3(-wallJumpDir.x * wallJumpForce, wallJumpHeight, -wallJumpDir.z * wallJumpForce), ForceMode.Impulse);
-            }
-        }
-    }
-    public void OnFire(InputAction.CallbackContext context)
-    {
-        if (context.performed)
-        {
+            _stepsSinceLastGrounded = 0;
 
+            if (_stepsSinceLastJump > 1)
+            {
+                _jumpPhase = 0;
+            }
+
+            if (_groundContactCount > 1)
+            {
+                _contactNormal.Normalize();
+            }
+        }
+        else
+        {
+            _contactNormal = _upAxis;
+        }
+
+        if (_connectedBody)
+        {
+            if (_connectedBody.isKinematic || _connectedBody.mass >= _body.mass)
+            {
+                UpdateConnectionState();
+            }
         }
     }
-    public bool MaxHealth()
+    private bool CheckClimbing()
     {
-        if (health == startHealth)
+        if (Climbing)
+        {
+            if (_climbContactCount > 1)
+            {
+                _climbNormal.Normalize();
+                var upDot = Vector3.Dot(_upAxis, _climbNormal);
+                if (upDot >= _minGroundDotProduct)
+                {
+                    _climbNormal = _lastClimbNormal;
+                }
+            }
+            _groundContactCount = 1;
+            _contactNormal = _climbNormal;
             return true;
-        else
+        }
+
+        return false;
+    }
+
+    private bool CheckSwimming()
+    {
+        if (Swimming)
+        {
+            _groundContactCount = 0;
+            _contactNormal = _upAxis;
+            return true;
+        }
+        return false;
+    }
+    private void UpdateConnectionState()
+    {
+        if (_connectedBody == _previousConnectedBody)
+        {
+            var connectionMovement = _connectedBody.transform.TransformPoint(_connectionLocalPosition) -
+                                     _connectionWorldPosition;
+            _connectionVelocity = connectionMovement / Time.deltaTime;
+        }
+
+        _connectionWorldPosition = _body.position;
+        _connectionLocalPosition = _connectedBody.transform.InverseTransformPoint(_connectionWorldPosition);
+    }
+    private bool SnapToGround()
+    {
+        if (_stepsSinceLastGrounded > 1 || _stepsSinceLastJump <= 2)
         {
             return false;
         }
-    }
-    public void GainHealth(int amount)
-    {
-        if (health + amount > startHealth)
-            health = startHealth;
-        else
+
+        var speed = _velocity.magnitude;
+        if (speed > maxSnapSpeed)
         {
-            health += startHealth;
+            return false;
+        }
+
+        if (!Physics.Raycast(_body.position, -_upAxis, out var hit, probeDistance, probeMask, QueryTriggerInteraction.Ignore))
+        {
+            return false;
+        }
+
+        var upDot = Vector3.Dot(_upAxis, hit.normal);
+        if (upDot < GetMinDot(hit.collider.gameObject.layer))
+        {
+            return false;
+        }
+
+        _groundContactCount = 1;
+        _contactNormal = hit.normal;
+        var dot = Vector3.Dot(_velocity, hit.normal);
+        if (dot > 0f)
+        {
+            _velocity = (_velocity - hit.normal * dot).normalized * speed;
+        }
+
+        _connectedBody = hit.rigidbody;
+        return true;
+    }
+    private float GetMinDot(int layer)
+    {
+        return (stairsMask & (1 << layer)) == 0 ? _minGroundDotProduct : _minStairsDotProduct;
+    }
+    protected void OnCollisionEnter(Collision collision)
+    {
+        EvaluateCollision(collision);
+    }
+
+    protected void OnCollisionStay(Collision collision)
+    {
+        EvaluateCollision(collision);
+    }
+    protected void OnTriggerEnter(Collider col)
+    {
+        if ((waterMask & (1 << col.gameObject.layer)) != 0)
+        {
+            EvaluateSubmergence(col);
         }
     }
-    public void Respawn()
-    {
-        Health = startHealth;
-        //bar.SetHealth(Health);
-        transform.position = RespawnPoint;
-    }
-    bool CompareLayerIndex(Transform t, LayerMask layer)
-    {
-        return Mathf.Pow(2, t.gameObject.layer) == layer;
-    }
-    #region Collision
+
     protected void OnTriggerStay(Collider col)
     {
-        //if (col.gameObject.layer == 4)
-        //    inWater = true;
+        if ((waterMask & (1 << col.gameObject.layer)) != 0)
+        {
+            EvaluateSubmergence(col);
+        }
     }
-    bool IsGrounded()
+    private void EvaluateSubmergence(Collider collision)
     {
-        if (justjumpedTimer <= 0)
-            return Physics.CheckSphere(groundCheck.position, .1f, mask);
+        if (Physics.Raycast(_body.position + _upAxis * submergenceOffset, -_upAxis, out RaycastHit hit,
+            submergenceRange + 1f, waterMask, QueryTriggerInteraction.Collide))
+        {
+            _submergence = 1f - hit.distance / submergenceRange;
+        }
         else
-            return false;
+        {
+            _submergence = 1f;
+        }
+        if (Swimming)
+        {
+            _connectedBody = collision.attachedRigidbody;
+        }
+    }
+    private void EvaluateCollision(Collision collision)
+    {
+        if (Swimming)
+        {
+            return;
+        }
+        var layer = collision.gameObject.layer;
+        var minDot = GetMinDot(layer);
+        for (var i = 0; i < collision.contactCount; i++)
+        {
+            var normal = collision.GetContact(i).normal;
+            var upDot = Vector3.Dot(_upAxis, normal);
+
+            if (upDot >= minDot)
+            {
+                _groundContactCount += 1;
+                _contactNormal += normal;
+                _connectedBody = collision.rigidbody;
+            }
+            else
+            {
+                if (upDot > -0.01f)
+                {
+                    _steepContactCount += 1;
+                    _steepNormal += normal;
+                    if (_groundContactCount == 0)
+                    {
+                        _connectedBody = collision.rigidbody;
+                    }
+                }
+
+                if (_desiresClimbing && upDot >= _minClimbDotProduct && (climbMask & (1 << layer)) != 0)
+                {
+                    _climbContactCount += 1;
+                    _climbNormal += normal;
+                    _lastClimbNormal = normal;
+                    _connectedBody = collision.rigidbody;
+                }
+            }
+        }
+    }
+    private bool CheckSteepContacts()
+    {
+        if (_steepContactCount > 1)
+        {
+            _steepNormal.Normalize();
+            var upDot = Vector3.Dot(_upAxis, _steepNormal);
+            if (upDot >= _minGroundDotProduct)
+            {
+                _steepContactCount = 0;
+                _groundContactCount = 1;
+                _contactNormal = _steepNormal;
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    protected void OnTriggerExit(Collider col)
-    {
-        //if (col.gameObject.layer == 4)
-        //    inWater = false;
-    }
-    #endregion
 }

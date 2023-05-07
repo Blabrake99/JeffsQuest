@@ -49051,11 +49051,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3991549056075789435}
-  - component: {fileID: 4336689482276351689}
   - component: {fileID: 4336689482276351687}
   - component: {fileID: 4336689482276351686}
   - component: {fileID: 4336689482276351685}
   - component: {fileID: 4336689482276351684}
+  - component: {fileID: 4336689482276351689}
   - component: {fileID: 4336689482276351683}
   - component: {fileID: 4336689482276351688}
   m_Layer: 6
@@ -49179,11 +49179,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 4336689482276351681}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e430689ea31180549a683d967ad2ba39, type: 3}
+  m_Script: {fileID: 11500000, guid: 11d273a1a4b204a4b9806cee2ecbef40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxWalkSpeed: 5
-  maxRunSpeed: 8
+  health: 6
+  damageCooldown: 0
+  maxWalkSpeed: 4
+  maxRunSpeed: 7
   maxClimbSpeed: 2
   maxSwimSpeed: 5
   maxAcceleration: 46.6
@@ -49215,10 +49217,11 @@ MonoBehaviour:
   waterDrag: 1
   buoyancy: 1
   swimThreshold: 0.5
-  turnSpeed: 10
-  boneToRotate: {fileID: 0}
+  turnSpeed: 20
+  boneToRotate: {fileID: 4426216975577121280}
   leftRotation: 0
   rightRotation: 0
+  RespawnPoint: {x: 0, y: 0, z: 0}
 --- !u!4 &4345657066926797032
 Transform:
   m_ObjectHideFlags: 0
