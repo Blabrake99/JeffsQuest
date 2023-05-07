@@ -182,7 +182,7 @@ public class PlayerMovement : MonoBehaviour
             jumpDirection = _steepNormal;
             _jumpPhase = 0;
         }
-        else if (maxAirJumps >= 0 && _jumpPhase <= maxAirJumps)
+        else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
         {
             if (_jumpPhase == 0)
             {
