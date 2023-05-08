@@ -94,7 +94,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected void Update()
     {
         _playerInput = actions.Player.Move.ReadValue<Vector2>();
-        //playerInput.z = Swimming ? Input.GetAxis("UpDown") : 0f;
+        _playerInput.z = actions.Player.UpDown.ReadValue<float>();
         _playerInput = Vector3.ClampMagnitude(_playerInput, 1f);
         _desiredJump = actions.Player.Jump.ReadValue<float>();
         _desiredRunning = actions.Player.Run.ReadValue<float>();
