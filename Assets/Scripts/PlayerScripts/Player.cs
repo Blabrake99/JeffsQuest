@@ -6,26 +6,36 @@ public abstract class Player : MonoBehaviour, IDamageble
 {
     [SerializeField, Tooltip("Players health")] protected int health = 6;
     [SerializeField, Tooltip("Players IFrames")] protected float damageCooldown;
-    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f, maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f, maxCrouchSpeed = 3f;
+    [Header("Speed")]
+    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f;
+    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float  maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f, maxCrouchSpeed = 3f;
+    [Header("Acceleration and deceleration")] 
+    [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")] float maxAcceleration = 46.6f;
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")]
-    float maxAcceleration = 10f, maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f
-        , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f;
-    [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float jumpHeight = 2f, wallJumpHeight = 6;
+    float maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f
+        , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f, crouchDeceleration = .5f;
+    [Header("For Jumping")]
+    [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float jumpHeight = 5f;
+    [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float wallJumpHeight = 6;
     [SerializeField, Range(0, 5), Tooltip("How many jumps the players allowed to do")] int maxAirJumps = 1;
     [SerializeField, Range(0f, 90f), Tooltip("This is the max ground angle to tell if the players Grounded or not")]
     float maxGroundAngle = 25f, maxStairsAngle = 50f;
     [SerializeField, Range(0f, 100f)] float maxSnapSpeed = 100f;
+    [Header("For collision")]
     [SerializeField, Min(0f), Tooltip("This is a raycast distance for below the player")] float probeDistance = 1f;
     [SerializeField, Tooltip("The layermasks for their respective names")] LayerMask probeMask = -1, stairsMask = -1, waterMask = 0, climbMask = -1, noneJumpableMask;
+    [Header("Camera")]
     [SerializeField, Tooltip("The Transform of the camera")] Transform playerInputSpace = default;
     [SerializeField, Tooltip("THe offset of water o nthe player. the higher the number the lower jeff will be in the water" +
         "befor he's at the top")]
     float submergenceOffset = 0.5f;
     [SerializeField, Range(90f, 170f)] private float maxClimbingAngle = 140f;
+    [Header("For underwater")]
     [SerializeField, Min(0.1f), Tooltip("This is for detecting when the player is fully submerged")] float submergenceRange = 1f;
     [SerializeField, Range(0f, 10f), Tooltip("Makes movement more sluggesh underwater")] float waterDrag = 1f;
     [SerializeField, Min(0f), Tooltip("the lower the bouyancy the faster it sinks underwater")] float buoyancy = 1f;
     [SerializeField, Range(0.01f, 1f), Tooltip("This defines the minimum submergence required for swimming")] float swimThreshold = 0.5f;
+    [Header("For Rotation")]
     [SerializeField, Tooltip("The speed at which he rotates when he moves")] float turnSpeed = 5;
     [Header("For spine rotation")]
     [SerializeField] Transform boneToRotate;
@@ -144,7 +154,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
                 _playerInput.x <= -.7f || _playerInput.y <= -.7f) && !isCrouching)
             {
-                curSpeed = maxRunSpeed;
+                curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
                 FixWalkingAnim(true);
 
                 anim.speed = 1;
@@ -152,13 +162,16 @@ public abstract class Player : MonoBehaviour, IDamageble
             if (_playerInput.x < .7f && _playerInput.y < .7f &&
                 _playerInput.x > -.7f && _playerInput.y > -.7f)
             {
-                curSpeed = (isCrouching) ? maxCrouchSpeed : maxWalkSpeed;
+                curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxWalkSpeed;
                 FixWalkingAnim(false);
             }
         }
         else
         {
-            curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
+            if (!isCrouching)
+                curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
+            else
+                curSpeed = Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime);
             if (_velocity.x != 0 || _velocity.z != 0)
             {
                 if (_desiredRunning == 0)
@@ -237,7 +250,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             anim.SetFloat("Velocity", .5f);
             if (Mathf.Abs(_playerInput.x) > Mathf.Abs(_playerInput.y))
             {
-                anim.speed = (isCrouching) ? Mathf.Abs(_playerInput.x * 1.5f) :Mathf.Abs(_playerInput.x);
+                anim.speed = (isCrouching) ? Mathf.Abs(_playerInput.x * 1.5f) : Mathf.Abs(_playerInput.x);
             }
             else if (Mathf.Abs(_playerInput.x) < Mathf.Abs(_playerInput.y))
             {
