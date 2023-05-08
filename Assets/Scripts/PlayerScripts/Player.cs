@@ -6,7 +6,7 @@ public abstract class Player : MonoBehaviour, IDamageble
 {
     [SerializeField, Tooltip("Players health")] protected int health = 6;
     [SerializeField, Tooltip("Players IFrames")] protected float damageCooldown;
-    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f, maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f;
+    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f, maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f, maxCrouchSpeed = 3f;
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")]
     float maxAcceleration = 10f, maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f
         , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f;
@@ -52,7 +52,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected bool InWater => _submergence > 0f;
     protected float _submergence, damagedTimer;
     protected bool Swimming => _submergence >= swimThreshold;
-    protected bool jumping, isInteracting;
+    protected bool jumping, isInteracting, isCrouching;
     protected Animator anim;
     protected int startHealth;
     protected PlayerAction actions;
@@ -113,6 +113,16 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             anim.SetBool("Jump", false);
         }
+        if (actions.Player.Crouch.ReadValue<float>() > 0 && ONGround)
+        {
+            anim.SetBool("Crouch", true);
+            isCrouching = true;
+        }
+        if (actions.Player.Crouch.ReadValue<float>() <= 0 || !ONGround)
+        {
+            isCrouching = false;
+            anim.SetBool("Crouch", false);
+        }
         if (Swimming)
         {
             _desiresClimbing = false;
@@ -131,8 +141,8 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         if (Gamepad.all.Count > 0)
         {
-            if (_playerInput.x >= .7f || _playerInput.y >= .7f ||
-                _playerInput.x <= -.7f || _playerInput.y <= -.7f)
+            if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
+                _playerInput.x <= -.7f || _playerInput.y <= -.7f) && !isCrouching)
             {
                 curSpeed = maxRunSpeed;
                 FixWalkingAnim(true);
@@ -142,7 +152,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             if (_playerInput.x < .7f && _playerInput.y < .7f &&
                 _playerInput.x > -.7f && _playerInput.y > -.7f)
             {
-                curSpeed = maxWalkSpeed;
+                curSpeed = (isCrouching) ? maxCrouchSpeed : maxWalkSpeed;
                 FixWalkingAnim(false);
             }
         }
@@ -227,11 +237,11 @@ public abstract class Player : MonoBehaviour, IDamageble
             anim.SetFloat("Velocity", .5f);
             if (Mathf.Abs(_playerInput.x) > Mathf.Abs(_playerInput.y))
             {
-                anim.speed = Mathf.Abs(_playerInput.x);
+                anim.speed = (isCrouching) ? Mathf.Abs(_playerInput.x * 1.5f) :Mathf.Abs(_playerInput.x);
             }
             else if (Mathf.Abs(_playerInput.x) < Mathf.Abs(_playerInput.y))
             {
-                anim.speed = Mathf.Abs(_playerInput.y);
+                anim.speed = (isCrouching) ? Mathf.Abs(_playerInput.y * 1.5f) : Mathf.Abs(_playerInput.y);
             }
             if (animatorWalkSpeed < .5f)
                 animatorWalkSpeed += animatorWalkAcceleration * Time.deltaTime;
