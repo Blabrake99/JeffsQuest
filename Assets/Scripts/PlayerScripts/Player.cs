@@ -149,24 +149,25 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             _velocity *= 1f - waterDrag * _submergence * Time.deltaTime;
         }
-        if (Gamepad.all.Count > 0)
+        if (Gamepad.all.Count > 0 && ONGround)
         {
-            if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
-                _playerInput.x <= -.7f || _playerInput.y <= -.7f) && !isCrouching)
-            {
-                curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
-                FixWalkingAnim(true);
+                if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
+                    _playerInput.x <= -.7f || _playerInput.y <= -.7f) && !isCrouching)
+                {
+                    curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
+                    FixWalkingAnim(true);
 
-                anim.speed = 1;
-            }
-            if (_playerInput.x < .7f && _playerInput.y < .7f &&
-                _playerInput.x > -.7f && _playerInput.y > -.7f)
-            {
-                curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxWalkSpeed;
-                FixWalkingAnim(false);
-            }
+                    anim.speed = 1;
+                }
+                if (_playerInput.x < .7f && _playerInput.y < .7f &&
+                    _playerInput.x > -.7f && _playerInput.y > -.7f)
+                {
+                    curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxWalkSpeed;
+                    FixWalkingAnim(false);
+                }
+         
         }
-        else
+        if(Gamepad.all.Count == 0 && ONGround)
         {
             if (!isCrouching)
                 curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
