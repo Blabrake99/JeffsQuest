@@ -125,7 +125,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             lastWallHit = null;
             anim.SetBool("Jump", false);
         }
-        if (actions.Player.Crouch.ReadValue<float>() > 0 && ONGround)
+        if (actions.Player.Crouch.ReadValue<float>() > 0 && ONGround && !ONSteep)
         {
             anim.SetBool("Crouch", true);
             isCrouching = true;
@@ -156,7 +156,8 @@ public abstract class Player : MonoBehaviour, IDamageble
             if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
                 _playerInput.x <= -.7f || _playerInput.y <= -.7f))
             {
-                curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
+                if(!ONSteep)
+                    curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
                 if (isCrouching && Mathf.Round(curSpeed) <= maxCrouchSpeed + 1)
                 {
                     FixWalkingAnim(false);
@@ -182,7 +183,8 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             if (!isCrouching)
             {
-                curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
+                if (!ONSteep)
+                    curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
             }
             else
             {
@@ -216,6 +218,14 @@ public abstract class Player : MonoBehaviour, IDamageble
             anim.SetBool("Jump", true);
             Jump(gravity);
             jumping = true;
+        }
+        if(ONSteep)
+        {
+            anim.SetBool("Sliding", true);
+        }
+        if(!ONSteep && ONGround)
+        {
+            anim.SetBool("Sliding", false);
         }
         if (_desiredJump < .05)
         {
