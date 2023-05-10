@@ -149,7 +149,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             _velocity *= 1f - waterDrag * _submergence * Time.deltaTime;
         }
-        if (Gamepad.all.Count > 0 && ONGround)
+        if (Gamepad.all.Count > 0 && ONGround && _desiredJump == 0)
         {
                 if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
                     _playerInput.x <= -.7f || _playerInput.y <= -.7f) && !isCrouching)
@@ -230,7 +230,27 @@ public abstract class Player : MonoBehaviour, IDamageble
         _body.velocity = _velocity;
         if (_playerInput.x > 0 || _playerInput.y > 0 || _playerInput.x < 0 || _playerInput.y < 0)
         {
+            //Quaternion temp = transform.rotation;
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(_body.velocity.x, 0, _body.velocity.z)), Time.deltaTime * turnSpeed);
+
+            //if (boneToRotate.rotation.y > leftRotation && temp.y < transform.rotation.y)
+            //{
+                //boneToRotate.rotation = Quaternion.Slerp(boneToRotate.rotation, Quaternion.Euler(72.649f, leftRotation, -94.082f), 1 * Time.deltaTime);
+                //boneToRotate.rotation = Quaternion.Euler(boneToRotate.localEulerAngles.x, Mathf.Lerp(boneToRotate.localEulerAngles.y, leftRotation, Time.deltaTime * 2), boneToRotate.localEulerAngles.z);
+                //boneToRotate.eulerAngles = new Vector3( boneToRotate.rotation.x, Mathf.Lerp(boneToRotate.rotation.y, leftRotation,Time.deltaTime * 2), boneToRotate.rotation.z);
+            //}
+            //if (boneToRotate.rotation.y < rightRotation && temp.y > transform.rotation.y)
+            //{
+            //    boneToRotate.rotation = Quaternion.Slerp(boneToRotate.rotation, Quaternion.Euler(72.649f, rightRotation, -94.082f), 1 * Time.deltaTime );
+            //    //boneToRotate.rotation = Quaternion.Euler(boneToRotate.localEulerAngles.x, Mathf.Lerp(boneToRotate.localEulerAngles.y, rightRotation, Time.deltaTime * 2), boneToRotate.localEulerAngles.z);
+            //    //boneToRotate.eulerAngles = new Vector3(boneToRotate.rotation.x, Mathf.Lerp(boneToRotate.rotation.y, rightRotation, Time.deltaTime * 2), boneToRotate.rotation.z);
+            //}
+            //if (temp.y == transform.rotation.y && transform.rotation.y > -94 ||
+            //    temp.y == transform.rotation.y && transform.rotation.y < -94)
+            //{
+            //    //boneToRotate.rotation = Quaternion.Euler(boneToRotate.localEulerAngles.x, Mathf.Lerp(boneToRotate.localEulerAngles.y, -94.574f, Time.deltaTime * 2), boneToRotate.localEulerAngles.z);
+            //    //boneToRotate.eulerAngles = new Vector3(boneToRotate.rotation.x, Mathf.Lerp(boneToRotate.rotation.y, -94.574f, Time.deltaTime * 2), boneToRotate.rotation.z);
+            //}
         }
 
         ClearState();
