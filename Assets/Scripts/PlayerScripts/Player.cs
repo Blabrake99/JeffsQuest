@@ -355,6 +355,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         if (alignedSpeed > 0f)
         {
             jumpSpeed = Mathf.Max(jumpSpeed - _velocity.y, 0f);
+            jumpSpeed *= 1.5f;
         }
 
         _velocity += jumpDirection * jumpSpeed;

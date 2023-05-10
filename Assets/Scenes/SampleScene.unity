@@ -49877,7 +49877,7 @@ MonoBehaviour:
   maxSwimSpeed: 12
   maxCrouchSpeed: 3
   maxAcceleration: 46.6
-  maxAirAcceleration: 18.9
+  maxAirAcceleration: 20
   maxSwimAcceleration: 20
   maxClimbAcceleration: 20
   animatorWalkAcceleration: 0.2
