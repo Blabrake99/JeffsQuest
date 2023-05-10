@@ -121,6 +121,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         if (ONGround && _body.velocity.y < 0 || Swimming)
         {
+            lastWallHit = null;
             anim.SetBool("Jump", false);
         }
         if (actions.Player.Crouch.ReadValue<float>() > 0 && ONGround)
@@ -149,7 +150,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             _velocity *= 1f - waterDrag * _submergence * Time.deltaTime;
         }
-        if (Gamepad.all.Count > 0 && ONGround && _desiredJump == 0)
+        if (Gamepad.all.Count > 0 )
         {
                 if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
                     _playerInput.x <= -.7f || _playerInput.y <= -.7f) && !isCrouching)
@@ -167,7 +168,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                 }
          
         }
-        if(Gamepad.all.Count == 0 && ONGround)
+        else
         {
             if (!isCrouching)
                 curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
@@ -289,12 +290,12 @@ public abstract class Player : MonoBehaviour, IDamageble
         _contactNormal = _steepNormal = _climbNormal = Vector3.zero;
         _connectionVelocity = Vector3.zero;
         _previousConnectedBody = _connectedBody;
-        _connectedBody = null;
+        _connectedBody =  null;
         _submergence = 0f;
     }
     private void Jump(Vector3 gravity)
     {
-        Vector3 jumpDirection = Vector3.up;
+        Vector3 jumpDirection;
         var jumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
         if (ONGround)
         {
@@ -312,7 +313,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                 {
                     _velocity.y = 0;
                     jumpDirection = _steepNormal;
-                    jumpSpeed = 2 * wallJumpHeight;
+
                 }
                 else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
                 {
@@ -355,7 +356,6 @@ public abstract class Player : MonoBehaviour, IDamageble
         if (alignedSpeed > 0f)
         {
             jumpSpeed = Mathf.Max(jumpSpeed - _velocity.y, 0f);
-            jumpSpeed *= 1.5f;
         }
 
         _velocity += jumpDirection * jumpSpeed;

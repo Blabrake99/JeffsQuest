@@ -49877,7 +49877,7 @@ MonoBehaviour:
   maxSwimSpeed: 12
   maxCrouchSpeed: 3
   maxAcceleration: 46.6
-  maxAirAcceleration: 20
+  maxAirAcceleration: 30
   maxSwimAcceleration: 20
   maxClimbAcceleration: 20
   animatorWalkAcceleration: 0.2
@@ -49886,8 +49886,8 @@ MonoBehaviour:
   jumpHeight: 5
   wallJumpHeight: 7
   maxAirJumps: 0
-  maxGroundAngle: 90
-  maxStairsAngle: 90
+  maxGroundAngle: 30
+  maxStairsAngle: 30
   maxSnapSpeed: 100
   probeDistance: 1
   probeMask:
