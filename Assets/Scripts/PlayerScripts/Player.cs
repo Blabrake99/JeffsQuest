@@ -8,8 +8,9 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Tooltip("Players IFrames")] protected float damageCooldown;
     [Header("Speed")]
     [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f;
-    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float  maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f, maxCrouchSpeed = 3f;
-    [Header("Acceleration and deceleration")] 
+    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f, maxCrouchSpeed = 3f;
+    //[SerializeField, Range(1f, 100f), Tooltip("This affect the jump speed (It's multiplicative)")] float jumpSpeedMultiplyer = 1.5f;
+    [Header("Acceleration and deceleration")]
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")] float maxAcceleration = 46.6f;
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")]
     float maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f
@@ -150,30 +151,45 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             _velocity *= 1f - waterDrag * _submergence * Time.deltaTime;
         }
-        if (Gamepad.all.Count > 0 )
+        if (Gamepad.all.Count > 0)
         {
-                if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
-                    _playerInput.x <= -.7f || _playerInput.y <= -.7f) && !isCrouching)
+            print(_playerInput);
+            if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
+                _playerInput.x <= -.7f || _playerInput.y <= -.7f))
+            {
+                curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
+                if (isCrouching && Mathf.Round(curSpeed) <= maxCrouchSpeed + 1)
                 {
-                    curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
-                    FixWalkingAnim(true);
-
-                    anim.speed = 1;
-                }
-                if (_playerInput.x < .7f && _playerInput.y < .7f &&
-                    _playerInput.x > -.7f && _playerInput.y > -.7f)
-                {
-                    curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxWalkSpeed;
                     FixWalkingAnim(false);
                 }
-         
+                if (!isCrouching)
+                {
+                    FixWalkingAnim(true);
+                }
+
+                anim.speed = 1;
+            }
+            if (_playerInput.x < .7f && _playerInput.y < .7f &&
+                _playerInput.x > -.7f && _playerInput.y > -.7f)
+            {
+                curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxWalkSpeed;
+
+                FixWalkingAnim(false);
+
+            }
+
         }
         else
         {
             if (!isCrouching)
                 curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
             else
+            {
                 curSpeed = Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime);
+
+                if (isCrouching && Mathf.Round(curSpeed) == maxCrouchSpeed)
+                    FixWalkingAnim(false);
+            }
             if (_velocity.x != 0 || _velocity.z != 0)
             {
                 if (_desiredRunning == 0)
@@ -236,9 +252,9 @@ public abstract class Player : MonoBehaviour, IDamageble
 
             //if (boneToRotate.rotation.y > leftRotation && temp.y < transform.rotation.y)
             //{
-                //boneToRotate.rotation = Quaternion.Slerp(boneToRotate.rotation, Quaternion.Euler(72.649f, leftRotation, -94.082f), 1 * Time.deltaTime);
-                //boneToRotate.rotation = Quaternion.Euler(boneToRotate.localEulerAngles.x, Mathf.Lerp(boneToRotate.localEulerAngles.y, leftRotation, Time.deltaTime * 2), boneToRotate.localEulerAngles.z);
-                //boneToRotate.eulerAngles = new Vector3( boneToRotate.rotation.x, Mathf.Lerp(boneToRotate.rotation.y, leftRotation,Time.deltaTime * 2), boneToRotate.rotation.z);
+            //boneToRotate.rotation = Quaternion.Slerp(boneToRotate.rotation, Quaternion.Euler(72.649f, leftRotation, -94.082f), 1 * Time.deltaTime);
+            //boneToRotate.rotation = Quaternion.Euler(boneToRotate.localEulerAngles.x, Mathf.Lerp(boneToRotate.localEulerAngles.y, leftRotation, Time.deltaTime * 2), boneToRotate.localEulerAngles.z);
+            //boneToRotate.eulerAngles = new Vector3( boneToRotate.rotation.x, Mathf.Lerp(boneToRotate.rotation.y, leftRotation,Time.deltaTime * 2), boneToRotate.rotation.z);
             //}
             //if (boneToRotate.rotation.y < rightRotation && temp.y > transform.rotation.y)
             //{
@@ -290,7 +306,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         _contactNormal = _steepNormal = _climbNormal = Vector3.zero;
         _connectionVelocity = Vector3.zero;
         _previousConnectedBody = _connectedBody;
-        _connectedBody =  null;
+        _connectedBody = null;
         _submergence = 0f;
     }
     private void Jump(Vector3 gravity)
@@ -356,6 +372,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         if (alignedSpeed > 0f)
         {
             jumpSpeed = Mathf.Max(jumpSpeed - _velocity.y, 0f);
+
         }
 
         _velocity += jumpDirection * jumpSpeed;

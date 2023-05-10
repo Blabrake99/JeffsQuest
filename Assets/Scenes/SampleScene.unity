@@ -49882,7 +49882,7 @@ MonoBehaviour:
   maxClimbAcceleration: 20
   animatorWalkAcceleration: 0.2
   animatorWalkdeceleration: 0.5
-  crouchDeceleration: 2
+  crouchDeceleration: 1
   jumpHeight: 5
   wallJumpHeight: 7
   maxAirJumps: 0
