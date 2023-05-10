@@ -153,7 +153,6 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         if (Gamepad.all.Count > 0)
         {
-            print(_playerInput);
             if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
                 _playerInput.x <= -.7f || _playerInput.y <= -.7f))
             {
@@ -182,15 +181,23 @@ public abstract class Player : MonoBehaviour, IDamageble
         else
         {
             if (!isCrouching)
+            {
                 curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
+            }
             else
             {
                 curSpeed = Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime);
 
-                if (isCrouching && Mathf.Round(curSpeed) == maxCrouchSpeed)
+                if (isCrouching && Mathf.Round(curSpeed) <= maxCrouchSpeed + 1)
+                {
                     FixWalkingAnim(false);
+                }
+                if (!isCrouching)
+                {
+                    FixWalkingAnim(true);
+                }
             }
-            if (_velocity.x != 0 || _velocity.z != 0)
+            if (_velocity.x != 0 && !isCrouching || _velocity.z != 0 && !isCrouching)
             {
                 if (_desiredRunning == 0)
                 {
@@ -204,7 +211,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         AdjustVelocity();
 
-        if (_desiredJump > 0.05 && !jumping)
+        if (_desiredJump > 0.05 && !jumping && !ONSteep)
         {
             anim.SetBool("Jump", true);
             Jump(gravity);
