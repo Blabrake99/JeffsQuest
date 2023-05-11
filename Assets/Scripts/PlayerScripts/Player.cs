@@ -673,6 +673,12 @@ public abstract class Player : MonoBehaviour, IDamageble
         if ((waterMask & (1 << col.gameObject.layer)) != 0)
         {
             EvaluateSubmergence(col);
+            return;
+        }
+        ICollectibles collectible = col.GetComponent<ICollectibles>();
+        if (collectible != null)
+        {
+            collectible.Collected();
         }
     }
 

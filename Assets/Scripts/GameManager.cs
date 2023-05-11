@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    int money = 0;
-    public void GainMoney(int gainedCurrancy)
+    static int money = 0;
+    public static void GainMoney(int gainedCurrancy)
     {
         money += gainedCurrancy;
     }
