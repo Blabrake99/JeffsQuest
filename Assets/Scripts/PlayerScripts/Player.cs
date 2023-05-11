@@ -58,7 +58,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected float _minGroundDotProduct, _minStairsDotProduct, _minClimbDotProduct, animatorWalkSpeed;
     protected int _stepsSinceLastGrounded, _stepsSinceLastJump;
     protected bool InWater => _submergence > 0f;
-    protected float _submergence, damagedTimer;
+    protected float _submergence, damagedTimer, _jumpHoldTimer;
     protected bool Swimming => _submergence >= swimThreshold;
     protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration;
     protected Animator anim;
@@ -240,10 +240,17 @@ public abstract class Player : MonoBehaviour, IDamageble
         // && !ONSteep
         if (_desiredJump > 0.05f && !jumping && !isCrouchDeceleration)
         {
-            print("jump");
             anim.SetBool("Jump", true);
             Jump(gravity);
             jumping = true;
+        }
+        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < .3f && lastWallHit == null)
+        {
+            _velocity -= new Vector3(0, 1, 0);
+        }
+        if(_desiredJump > 0 && jumping && !ONGround)
+        {
+            _jumpHoldTimer += Time.deltaTime;
         }
         //if(ONSteep)
         //{
@@ -253,12 +260,11 @@ public abstract class Player : MonoBehaviour, IDamageble
         //{
         //    anim.SetBool("Sliding", false);
         //}
-        if (_desiredJump < .05f)
+        if (_desiredJump < .05f && ONGround || _desiredJump < .05f && ONSteep)
         {
-
             jumping = false;
+            _jumpHoldTimer = 0;
         }
-
         if (Climbing)
         {
             _velocity -= _contactNormal * (maxClimbAcceleration * 0.9f * Time.deltaTime);
