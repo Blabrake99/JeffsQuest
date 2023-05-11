@@ -38,6 +38,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Range(0.01f, 1f), Tooltip("This defines the minimum submergence required for swimming")] float swimThreshold = 0.5f;
     [Header("For Rotation")]
     [SerializeField, Tooltip("The speed at which he rotates when he moves")] float turnSpeed = 5;
+    [SerializeField,Range(.1f,2f), Tooltip("How long you have to hold the jump button to do a full jump")] float fullJumpTime = .3f;
     [HideInInspector] public Vector3 RespawnPoint;
     protected float curSpeed;
     protected int jumpPhase;
@@ -245,7 +246,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             jumping = true;
             _shortJumpTimer = 0;
         }
-        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < .3f && lastWallHit == null && _shortJumpTimer < .15f)
+        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && lastWallHit == null && _shortJumpTimer < .15f)
         {
             _velocity -= new Vector3(0, 1, 0);
             _shortJumpTimer += Time.deltaTime;
