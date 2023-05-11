@@ -49876,6 +49876,8 @@ MonoBehaviour:
   maxClimbSpeed: 2
   maxSwimSpeed: 12
   maxCrouchSpeed: 1
+  longJumpHeight: 7
+  longJumpDistance: 15
   jumpSpeedMultiplyer: 1.1
   maxAcceleration: 27.2
   maxAirAcceleration: 19.7
@@ -49914,9 +49916,6 @@ MonoBehaviour:
   buoyancy: 1
   swimThreshold: 0.5
   turnSpeed: 20
-  boneToRotate: {fileID: 2277609869545846108}
-  leftRotation: -120.6
-  rightRotation: -70.1
   RespawnPoint: {x: 0, y: 0, z: 0}
 --- !u!4 &4345657066926797032
 Transform:

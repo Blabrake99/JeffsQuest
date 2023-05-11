@@ -8,7 +8,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Tooltip("Players IFrames")] protected float damageCooldown;
     [Header("Speed")]
     [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f;
-    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f, maxCrouchSpeed = 3f;
+    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f, maxCrouchSpeed = 3f, longJumpHeight = 3, longJumpDistance = 3;
     [SerializeField, Range(1f, 3), Tooltip("This affect the wall jump distance (It's multiplicative)")] float jumpSpeedMultiplyer = 1.1f;
     [Header("Acceleration and deceleration")]
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")] float maxAcceleration = 46.6f;
@@ -38,9 +38,6 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Range(0.01f, 1f), Tooltip("This defines the minimum submergence required for swimming")] float swimThreshold = 0.5f;
     [Header("For Rotation")]
     [SerializeField, Tooltip("The speed at which he rotates when he moves")] float turnSpeed = 5;
-    [Header("For spine rotation")]
-    [SerializeField] Transform boneToRotate;
-    [SerializeField] float leftRotation, rightRotation;
     [HideInInspector] public Vector3 RespawnPoint;
     protected float curSpeed;
     protected int jumpPhase;
@@ -63,7 +60,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected bool InWater => _submergence > 0f;
     protected float _submergence, damagedTimer;
     protected bool Swimming => _submergence >= swimThreshold;
-    protected bool jumping, isInteracting, isCrouching;
+    protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration;
     protected Animator anim;
     protected int startHealth;
     protected PlayerAction actions;
@@ -105,9 +102,10 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected void Update()
     {
         _playerInput = actions.Player.Move.ReadValue<Vector2>();
-        if(Swimming)
+        if (Swimming)
             _playerInput.z = actions.Player.UpDown.ReadValue<float>();
         _playerInput = Vector3.ClampMagnitude(_playerInput, 1f);
+
         _desiredJump = actions.Player.Jump.ReadValue<float>();
         _desiredRunning = actions.Player.Run.ReadValue<float>();
         if (playerInputSpace)
@@ -125,13 +123,14 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             lastWallHit = null;
             anim.SetBool("Jump", false);
+            anim.SetBool("Sliding", false);
         }
         if (actions.Player.Crouch.ReadValue<float>() > 0 && ONGround && !ONSteep)
         {
             anim.SetBool("Crouch", true);
             isCrouching = true;
         }
-        if (actions.Player.Crouch.ReadValue<float>() <= 0 || !ONGround)
+        if (actions.Player.Crouch.ReadValue<float>() <= 0 || Swimming)
         {
             isCrouching = false;
             anim.SetBool("Crouch", false);
@@ -158,14 +157,27 @@ public abstract class Player : MonoBehaviour, IDamageble
                 _playerInput.x <= -.7f || _playerInput.y <= -.7f))
             {
                 //if(!ONSteep)
-                    curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
-                if (isCrouching && Mathf.Round(curSpeed) <= maxCrouchSpeed + 1)
+                curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
+                if (isCrouching && Mathf.Round(curSpeed) <= maxCrouchSpeed + 1 && ONGround)
                 {
+                    isCrouchDeceleration = false;
                     FixWalkingAnim(false);
                 }
-                if (!isCrouching)
+                if (!isCrouching && ONGround)
                 {
+                    isCrouchDeceleration = false;
                     FixWalkingAnim(true);
+                }
+                if (isCrouching && Mathf.Round(curSpeed) > maxCrouchSpeed + 1)
+                {
+                    isCrouchDeceleration = true;
+                    if (_desiredJump > 0 && ONGround)
+                    {
+                        isCrouchDeceleration = true;
+                        anim.SetBool("Sliding", true);
+                        _velocity = GetCameraDirection() * longJumpDistance;
+                        _velocity +=  new Vector3(0, 1, 0) * longJumpHeight;
+                    }
                 }
 
                 anim.speed = 1;
@@ -185,19 +197,31 @@ public abstract class Player : MonoBehaviour, IDamageble
             if (!isCrouching)
             {
                 //if (!ONSteep)
-                    curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
+                curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
             }
             else
             {
-                curSpeed = Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime);
-
-                if (isCrouching && Mathf.Round(curSpeed) <= maxCrouchSpeed + 1)
+                curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
+                if (isCrouching && Mathf.Round(curSpeed) <= maxCrouchSpeed + 1 && ONGround)
                 {
+                    isCrouchDeceleration = false;
                     FixWalkingAnim(false);
                 }
-                if (!isCrouching)
+                if (!isCrouching && ONGround)
                 {
+                    isCrouchDeceleration = false;
                     FixWalkingAnim(true);
+                }
+                if (isCrouching && Mathf.Round(curSpeed) > maxCrouchSpeed + 1)
+                {
+                    isCrouchDeceleration = true;
+                    if (_desiredJump > 0 && ONGround)
+                    {
+                        isCrouchDeceleration = true;
+                        anim.SetBool("Sliding", true);
+                        _velocity = GetCameraDirection() * longJumpDistance;
+                        _velocity += new Vector3(0, 1, 0) * longJumpHeight;
+                    }
                 }
             }
             if (_velocity.x != 0 && !isCrouching || _velocity.z != 0 && !isCrouching)
@@ -214,8 +238,9 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         AdjustVelocity();
         // && !ONSteep
-        if (_desiredJump > 0.05f && !jumping)
+        if (_desiredJump > 0.05f && !jumping && !isCrouchDeceleration)
         {
+            print("jump");
             anim.SetBool("Jump", true);
             Jump(gravity);
             jumping = true;
@@ -289,6 +314,18 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
 
         ClearState();
+    }
+    Vector3 GetCameraDirection()
+    {
+        Vector3 forward = playerInputSpace.forward;
+        Vector3 right = playerInputSpace.transform.right;
+        forward.y = 0;
+        right.y = 0;
+        forward = forward.normalized;
+        right = right.normalized;
+        Vector3 forwardRelativeInput = _playerInput.y * forward;
+        Vector3 rightRelativeInput = _playerInput.x * right;
+        return forwardRelativeInput + rightRelativeInput;
     }
     void FixWalkingAnim(bool isRunning)
     {
