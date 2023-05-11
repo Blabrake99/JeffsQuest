@@ -2495,7 +2495,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh25202
+  m_Name: pb_Mesh66132
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -8615,7 +8615,7 @@ MonoBehaviour:
   zoomSpeed: 10
   focusRadius: 1
   focusCentering: 0.5
-  rotationSpeed: 90
+  rotationSpeed: 115
   minVerticalAngle: 5.4
   maxVerticalAngle: 60
   alignDelay: 5
@@ -8623,7 +8623,7 @@ MonoBehaviour:
   obstructionMask:
     serializedVersion: 2
     m_Bits: 11
-  cameraAcceleration: 1
+  cameraAcceleration: 4
   YMin: -5
   speed: 0
 --- !u!1 &970650112
@@ -49878,7 +49878,7 @@ MonoBehaviour:
   maxCrouchSpeed: 1
   jumpSpeedMultiplyer: 1.1
   maxAcceleration: 46.6
-  maxAirAcceleration: 30
+  maxAirAcceleration: 19.7
   maxSwimAcceleration: 20
   maxClimbAcceleration: 20
   animatorWalkAcceleration: 0.2
