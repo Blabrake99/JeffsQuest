@@ -9,7 +9,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [Header("Speed")]
     [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f;
     [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f, maxCrouchSpeed = 3f;
-    //[SerializeField, Range(1f, 100f), Tooltip("This affect the jump speed (It's multiplicative)")] float jumpSpeedMultiplyer = 1.5f;
+    [SerializeField, Range(1f, 3), Tooltip("This affect the wall jump distance (It's multiplicative)")] float jumpSpeedMultiplyer = 1.1f;
     [Header("Acceleration and deceleration")]
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")] float maxAcceleration = 46.6f;
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")]
@@ -105,7 +105,8 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected void Update()
     {
         _playerInput = actions.Player.Move.ReadValue<Vector2>();
-        _playerInput.z = actions.Player.UpDown.ReadValue<float>();
+        if(Swimming)
+            _playerInput.z = actions.Player.UpDown.ReadValue<float>();
         _playerInput = Vector3.ClampMagnitude(_playerInput, 1f);
         _desiredJump = actions.Player.Jump.ReadValue<float>();
         _desiredRunning = actions.Player.Run.ReadValue<float>();
@@ -156,7 +157,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
                 _playerInput.x <= -.7f || _playerInput.y <= -.7f))
             {
-                if(!ONSteep)
+                //if(!ONSteep)
                     curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
                 if (isCrouching && Mathf.Round(curSpeed) <= maxCrouchSpeed + 1)
                 {
@@ -183,7 +184,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             if (!isCrouching)
             {
-                if (!ONSteep)
+                //if (!ONSteep)
                     curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
             }
             else
@@ -212,22 +213,22 @@ public abstract class Player : MonoBehaviour, IDamageble
             }
         }
         AdjustVelocity();
-
-        if (_desiredJump > 0.05 && !jumping && !ONSteep)
+        // && !ONSteep
+        if (_desiredJump > 0.05f && !jumping)
         {
             anim.SetBool("Jump", true);
             Jump(gravity);
             jumping = true;
         }
-        if(ONSteep)
-        {
-            anim.SetBool("Sliding", true);
-        }
-        if(!ONSteep && ONGround)
-        {
-            anim.SetBool("Sliding", false);
-        }
-        if (_desiredJump < .05)
+        //if(ONSteep)
+        //{
+        //    anim.SetBool("Sliding", true);
+        //}
+        //if(!ONSteep && ONGround)
+        //{
+        //    anim.SetBool("Sliding", false);
+        //}
+        if (_desiredJump < .05f)
         {
 
             jumping = false;
@@ -389,7 +390,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         if (alignedSpeed > 0f)
         {
             jumpSpeed = Mathf.Max(jumpSpeed - _velocity.y, 0f);
-
+            jumpSpeed *= jumpSpeedMultiplyer;
         }
 
         _velocity += jumpDirection * jumpSpeed;
