@@ -58,7 +58,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected float _minGroundDotProduct, _minStairsDotProduct, _minClimbDotProduct, animatorWalkSpeed;
     protected int _stepsSinceLastGrounded, _stepsSinceLastJump;
     protected bool InWater => _submergence > 0f;
-    protected float _submergence, damagedTimer, _jumpHoldTimer;
+    protected float _submergence, damagedTimer, _jumpHoldTimer, _shortJumpTimer;
     protected bool Swimming => _submergence >= swimThreshold;
     protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration;
     protected Animator anim;
@@ -119,7 +119,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             _rightAxis = ProjectDirectionOnPlane(Vector3.right, _upAxis);
             _forwardAxis = ProjectDirectionOnPlane(Vector3.forward, _upAxis);
         }
-        if (ONGround && _body.velocity.y < 0 || Swimming)
+        if (ONGround && _body.velocity.y <= 0 || Swimming)
         {
             lastWallHit = null;
             anim.SetBool("Jump", false);
@@ -243,10 +243,12 @@ public abstract class Player : MonoBehaviour, IDamageble
             anim.SetBool("Jump", true);
             Jump(gravity);
             jumping = true;
+            _shortJumpTimer = 0;
         }
-        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < .3f && lastWallHit == null)
+        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < .3f && lastWallHit == null && _shortJumpTimer < .15f)
         {
             _velocity -= new Vector3(0, 1, 0);
+            _shortJumpTimer += Time.deltaTime;
         }
         if(_desiredJump > 0 && jumping && !ONGround)
         {
