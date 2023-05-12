@@ -250,7 +250,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             jumping = true;
             _shortJumpTimer = 0;
         }
-        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && lastWallHit == null && _shortJumpTimer < .1f)
+        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && lastWallHit == null && _shortJumpTimer < .05f)
         {
             print("fast falling");
             _velocity -= new Vector3(0, 1, 0);
