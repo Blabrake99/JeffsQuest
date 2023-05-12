@@ -157,10 +157,10 @@ public abstract class Player : MonoBehaviour, IDamageble
             if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
                 _playerInput.x <= -.7f || _playerInput.y <= -.7f))
             {
-                //if(!ONSteep)
                 curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
                 if (isCrouching && Mathf.Round(curSpeed) <= maxCrouchSpeed + 1 && ONGround)
                 {
+                    longJumping = false;
                     isCrouchDeceleration = false;
                     FixWalkingAnim(false);
                 }
@@ -180,6 +180,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                         anim.SetBool("Sliding", true);
                         _velocity = GetCameraDirection() * longJumpDistance;
                         Jump(gravity, true);
+                        jumping = true;
                     }
                 }
 
@@ -207,6 +208,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                 curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
                 if (isCrouching && Mathf.Round(curSpeed) <= maxCrouchSpeed + 1 && ONGround)
                 {
+                    longJumping = false;
                     isCrouchDeceleration = false;
                     FixWalkingAnim(false);
                 }
@@ -226,6 +228,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                         anim.SetBool("Sliding", true);
                         _velocity = GetCameraDirection() * longJumpDistance;
                         Jump(gravity, true);
+                        jumping = true;
                     }
                 }
             }
