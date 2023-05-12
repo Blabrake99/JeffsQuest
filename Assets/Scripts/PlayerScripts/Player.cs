@@ -61,7 +61,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected bool InWater => _submergence > 0f;
     protected float _submergence, damagedTimer, _jumpHoldTimer, _shortJumpTimer;
     protected bool Swimming => _submergence >= swimThreshold;
-    protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration;
+    protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration, longJumping;
     protected Animator anim;
     protected int startHealth;
     protected PlayerAction actions;
@@ -166,18 +166,20 @@ public abstract class Player : MonoBehaviour, IDamageble
                 }
                 if (!isCrouching && ONGround)
                 {
+                    longJumping = false;
                     isCrouchDeceleration = false;
                     FixWalkingAnim(true);
                 }
                 if (isCrouching && Mathf.Round(curSpeed) > maxCrouchSpeed + 1)
                 {
                     isCrouchDeceleration = true;
-                    if (_desiredJump > 0 && ONGround)
+                    if (_desiredJump > 0 && ONGround && !longJumping)
                     {
+                        longJumping = true;
                         isCrouchDeceleration = true;
                         anim.SetBool("Sliding", true);
                         _velocity = GetCameraDirection() * longJumpDistance;
-                        _velocity +=  new Vector3(0, 1, 0) * longJumpHeight;
+                        Jump(gravity, true);
                     }
                 }
 
@@ -210,18 +212,20 @@ public abstract class Player : MonoBehaviour, IDamageble
                 }
                 if (!isCrouching && ONGround)
                 {
+                    longJumping = false;
                     isCrouchDeceleration = false;
                     FixWalkingAnim(true);
                 }
                 if (isCrouching && Mathf.Round(curSpeed) > maxCrouchSpeed + 1)
                 {
                     isCrouchDeceleration = true;
-                    if (_desiredJump > 0 && ONGround)
+                    if (_desiredJump > 0 && ONGround && !longJumping)
                     {
+                        longJumping = true;
                         isCrouchDeceleration = true;
                         anim.SetBool("Sliding", true);
                         _velocity = GetCameraDirection() * longJumpDistance;
-                        _velocity += new Vector3(0, 1, 0) * longJumpHeight;
+                        Jump(gravity, true);
                     }
                 }
             }
@@ -242,12 +246,13 @@ public abstract class Player : MonoBehaviour, IDamageble
         if (_desiredJump > 0.05f && !jumping && !isCrouchDeceleration)
         {
             anim.SetBool("Jump", true);
-            Jump(gravity);
+            Jump(gravity, false);
             jumping = true;
             _shortJumpTimer = 0;
         }
-        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && lastWallHit == null && _shortJumpTimer < .15f)
+        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && lastWallHit == null && _shortJumpTimer < .1f)
         {
+            print("fast falling");
             _velocity -= new Vector3(0, 1, 0);
             _shortJumpTimer += Time.deltaTime;
         }
@@ -373,10 +378,11 @@ public abstract class Player : MonoBehaviour, IDamageble
         _connectedBody = null;
         _submergence = 0f;
     }
-    private void Jump(Vector3 gravity)
+    private void Jump(Vector3 gravity, bool longJumping)
     {
         Vector3 jumpDirection;
-        var jumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
+        
+        var jumpSpeed = (longJumping) ? Mathf.Sqrt(2f * gravity.magnitude * longJumpHeight) : Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
         if (ONGround)
         {
             jumpDirection = _contactNormal;

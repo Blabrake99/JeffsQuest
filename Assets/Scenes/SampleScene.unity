@@ -48750,7 +48750,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-4744
+  m_Name: pb_Mesh28118
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -50354,7 +50354,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-6154
+  m_Name: pb_Mesh28270
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -52008,8 +52008,8 @@ MonoBehaviour:
   maxClimbSpeed: 2
   maxSwimSpeed: 12
   maxCrouchSpeed: 1
-  longJumpHeight: 5
-  longJumpDistance: 15
+  longJumpHeight: 3
+  longJumpDistance: 20
   jumpSpeedMultiplyer: 1.1
   maxAcceleration: 27.2
   maxAirAcceleration: 19.7
