@@ -14,7 +14,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")] float maxAcceleration = 46.6f;
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")]
     float maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f
-        , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f, crouchDeceleration = .5f;
+        , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f, crouchDeceleration = .5f, crouchTurnAcceleration = 3f;
     [Header("For Jumping")]
     [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float jumpHeight = 5f;
     [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float wallJumpHeight = 6;
@@ -252,7 +252,6 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && lastWallHit == null && _shortJumpTimer < .05f)
         {
-            print("fast falling");
             _velocity -= new Vector3(0, 1, 0);
             _shortJumpTimer += Time.deltaTime;
         }
@@ -472,7 +471,10 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         else
         {
-            acceleration = ONGround ? maxAcceleration : maxAirAcceleration;
+            if (!isCrouchDeceleration && !longJumping)
+                acceleration = ONGround ? maxAcceleration : maxAirAcceleration;
+            else
+                acceleration = crouchTurnAcceleration;
             speed = ONGround && _desiresClimbing ? maxClimbSpeed : curSpeed;
             xAxis = _rightAxis;
             zAxis = _forwardAxis;

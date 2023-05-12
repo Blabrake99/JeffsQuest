@@ -52018,6 +52018,7 @@ MonoBehaviour:
   animatorWalkAcceleration: 0.2
   animatorWalkdeceleration: 0.5
   crouchDeceleration: 2
+  crouchTurnAcceleration: 6
   jumpHeight: 5
   wallJumpHeight: 7
   maxAirJumps: 0
