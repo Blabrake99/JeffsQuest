@@ -152,6 +152,12 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             _velocity *= 1f - waterDrag * _submergence * Time.deltaTime;
         }
+        if ((longJumping && _playerInput.x <= .05 && ONGround ||
+            longJumping && _playerInput.y <= .05 && ONGround))
+        {
+            longJumping = false;
+            _velocity = new Vector3(0, _velocity.y, 0);
+        }
         if (Gamepad.all.Count > 0)
         {
             if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
@@ -200,6 +206,8 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             if (!isCrouching)
             {
+                longJumping = false;
+                isCrouchDeceleration = false;
                 //if (!ONSteep)
                 curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
             }
@@ -524,6 +532,9 @@ public abstract class Player : MonoBehaviour, IDamageble
     }
     public void Respawn()
     {
+        _velocity = Vector3.zero;
+        longJumping = false;
+        isCrouchDeceleration = false;
         Health = startHealth;
         //bar.SetHealth(Health);
         transform.position = RespawnPoint;
