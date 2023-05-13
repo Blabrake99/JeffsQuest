@@ -14,7 +14,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")] float maxAcceleration = 46.6f;
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")]
     float maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f
-        , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f, crouchDeceleration = .5f, crouchTurnAcceleration = 3f;
+        , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f, crouchDeceleration = .5f, crouchTurnAcceleration = 3f, maxRunSpeedAcceleration = 4f;
     [Header("For Jumping")]
     [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float jumpHeight = 5f;
     [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float wallJumpHeight = 6;
@@ -163,7 +163,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
                 _playerInput.x <= -.7f || _playerInput.y <= -.7f))
             {
-                curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : maxRunSpeed;
+                curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxCrouchSpeed, crouchDeceleration * Time.deltaTime) : Mathf.Lerp(curSpeed, maxRunSpeed, maxRunSpeedAcceleration * Time.deltaTime);
                 if (isCrouching && Mathf.Round(curSpeed) <= maxCrouchSpeed + 1 && ONGround)
                 {
                     longJumping = false;
@@ -179,7 +179,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                 if (isCrouching && Mathf.Round(curSpeed) > maxCrouchSpeed + 1)
                 {
                     isCrouchDeceleration = true;
-                    if (_desiredJump > 0 && ONGround && !longJumping)
+                    if (_desiredJump > 0 && ONGround && !longJumping && curSpeed < maxRunSpeed - 2)
                     {
                         longJumping = true;
                         isCrouchDeceleration = true;
@@ -209,7 +209,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                 longJumping = false;
                 isCrouchDeceleration = false;
                 //if (!ONSteep)
-                curSpeed = (_desiredRunning > 0) ? curSpeed = maxRunSpeed : curSpeed = maxWalkSpeed;
+                curSpeed = (_desiredRunning > 0) ? maxRunSpeed : maxWalkSpeed;
             }
             else
             {
@@ -229,7 +229,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                 if (isCrouching && Mathf.Round(curSpeed) > maxCrouchSpeed + 1)
                 {
                     isCrouchDeceleration = true;
-                    if (_desiredJump > 0 && ONGround && !longJumping)
+                    if (_desiredJump > 0 && ONGround && !longJumping && curSpeed < maxRunSpeed - 2)
                     {
                         longJumping = true;
                         isCrouchDeceleration = true;
@@ -261,7 +261,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             jumping = true;
             _shortJumpTimer = 0;
         }
-        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && lastWallHit == null && _shortJumpTimer < .05f)
+        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && _shortJumpTimer < .07f)
         {
             _velocity -= new Vector3(0, 1, 0);
             _shortJumpTimer += Time.deltaTime;
