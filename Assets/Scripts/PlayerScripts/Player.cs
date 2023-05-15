@@ -15,6 +15,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")]
     float maxAirAcceleration = 1f, maxSwimAcceleration = 5f, maxClimbAcceleration = 20f
         , animatorWalkAcceleration = .2f, animatorWalkdeceleration = .5f, crouchDeceleration = .5f, crouchTurnAcceleration = 3f, maxRunSpeedAcceleration = 4f;
+    [SerializeField, Range(1, 3), Tooltip("deceleration for the player after long jumping the lower the number the longer he walks for")] float longJumpWalkDeceleration = 1.7f;
     [Header("For Jumping")]
     [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float jumpHeight = 5f;
     [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float wallJumpHeight = 6;
@@ -155,6 +156,8 @@ public abstract class Player : MonoBehaviour, IDamageble
         if ((longJumping && _playerInput.x <= .05 && ONGround ||
             longJumping && _playerInput.y <= .05 && ONGround))
         {
+            //this is so the player will do a little deceleration after long jumping 
+            _velocity = new Vector3(_velocity.x / longJumpWalkDeceleration, _velocity.y, _velocity.z / longJumpWalkDeceleration);
             longJumping = false;
         }
         if (Gamepad.all.Count > 0)
@@ -178,6 +181,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                 if (isCrouching && Mathf.Round(curSpeed) > maxCrouchSpeed + 1)
                 {
                     isCrouchDeceleration = true;
+                    //this is where we long jump
                     if (_desiredJump > 0 && ONGround && !longJumping && curSpeed < maxRunSpeed - 2)
                     {
                         longJumping = true;
@@ -227,6 +231,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                 if (isCrouching && Mathf.Round(curSpeed) > maxCrouchSpeed + 1)
                 {
                     isCrouchDeceleration = true;
+                    //this is where we long jump
                     if (_desiredJump > 0 && ONGround && !longJumping && curSpeed < maxRunSpeed - 2)
                     {
                         longJumping = true;
