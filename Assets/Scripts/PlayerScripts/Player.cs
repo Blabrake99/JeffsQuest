@@ -272,15 +272,8 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             _jumpHoldTimer += Time.deltaTime;
         }
-        //if(ONSteep)
-        //{
-        //    anim.SetBool("Sliding", true);
-        //}
-        //if(!ONSteep && ONGround)
-        //{
-        //    anim.SetBool("Sliding", false);
-        //}
-        if (_desiredJump < .05f && ONGround || _desiredJump < .05f && ONSteep)
+        //|| _desiredJump < .05f && ONSteep
+        if (_desiredJump < .05f && ONGround )
         {
             jumping = false;
             _jumpHoldTimer = 0;
