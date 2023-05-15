@@ -11,7 +11,7 @@ public class WayPointPlatforms : MonoBehaviour, IPlatforms
     WayToLoop wayToLoop;
 
     [SerializeField, Tooltip("The Speed of the platform"), Range(1,15)]
-    float speed;
+    float speed = 2;
     [Tooltip("If this is true the moving platforms active and moving")]
     public bool active = true;
 
