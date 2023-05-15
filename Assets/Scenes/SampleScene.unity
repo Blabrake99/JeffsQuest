@@ -54504,8 +54504,8 @@ MonoBehaviour:
   maxClimbSpeed: 2
   maxSwimSpeed: 12
   maxCrouchSpeed: 1
-  longJumpHeight: 2
-  longJumpDistance: 2.5
+  longJumpHeight: 5
+  longJumpDistance: 15
   jumpSpeedMultiplyer: 1.1
   maxAcceleration: 27.2
   maxAirAcceleration: 19.7

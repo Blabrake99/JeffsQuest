@@ -184,7 +184,6 @@ public abstract class Player : MonoBehaviour, IDamageble
                         longJumping = true;
                         isCrouchDeceleration = true;
                         anim.SetBool("Sliding", true);
-                        _velocity = GetCameraDirection() * longJumpDistance;
                         Jump(gravity, true);
                         jumping = true;
                     }
@@ -234,7 +233,6 @@ public abstract class Player : MonoBehaviour, IDamageble
                         longJumping = true;
                         isCrouchDeceleration = true;
                         anim.SetBool("Sliding", true);
-                        _velocity = GetCameraDirection() * longJumpDistance;
                         Jump(gravity, true);
                         jumping = true;
                     }
@@ -441,21 +439,45 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
 
         _stepsSinceLastJump = 0;
-        _jumpPhase += 1;
-
-        if (InWater)
+        if (!longJumping)
         {
-            jumpSpeed *= Mathf.Max(0f, 1f - _submergence / swimThreshold);
-        }
-        jumpDirection = (jumpDirection + _upAxis).normalized;
-        var alignedSpeed = Vector3.Dot(_velocity, jumpDirection);
-        if (alignedSpeed > 0f)
-        {
-            jumpSpeed = Mathf.Max(jumpSpeed - _velocity.y, 0f);
-            jumpSpeed *= jumpSpeedMultiplyer;
-        }
+            _jumpPhase += 1;
 
-        _velocity += jumpDirection * jumpSpeed;
+            if (InWater)
+            {
+                jumpSpeed *= Mathf.Max(0f, 1f - _submergence / swimThreshold);
+            }
+            jumpDirection = (jumpDirection + _upAxis).normalized;
+            var alignedSpeed = Vector3.Dot(_velocity, jumpDirection);
+            if (alignedSpeed > 0f)
+            {
+                jumpSpeed = Mathf.Max(jumpSpeed - _velocity.y, 0f);
+                jumpSpeed *= jumpSpeedMultiplyer;
+            }
+
+            _velocity += jumpDirection * jumpSpeed;
+        }
+        else
+        {
+            float LongjumpSpeed = Mathf.Sqrt(2f * gravity.magnitude * longJumpHeight);
+            if (InWater)
+            {
+                LongjumpSpeed *= Mathf.Max(0f, 1f - _submergence / swimThreshold);
+            }
+            jumpDirection = (jumpDirection + _upAxis).normalized;
+            float alignedSpeed = Vector3.Dot(_velocity, jumpDirection);
+            if (alignedSpeed > 0f)
+            {
+                if (jumpPhase == 0)
+                    LongjumpSpeed = Mathf.Max(LongjumpSpeed - alignedSpeed, 0f);
+                else
+                    LongjumpSpeed = Mathf.Max(LongjumpSpeed / 2 - alignedSpeed, 0f);
+            }
+            _velocity += jumpDirection * LongjumpSpeed;
+            Vector3 LongJumpDir = transform.forward * longJumpDistance;
+            _velocity = new Vector3(LongJumpDir.x, _velocity.y, LongJumpDir.z);
+            jumpPhase = 5;
+        }
     }
     Vector3 ProjectDirectionOnPlane(Vector3 direction, Vector3 normal)
     {
