@@ -54516,6 +54516,7 @@ MonoBehaviour:
   crouchDeceleration: 2
   crouchTurnAcceleration: 10.7
   maxRunSpeedAcceleration: 4
+  longJumpWalkDeceleration: 1.7
   jumpHeight: 5
   wallJumpHeight: 9.06
   maxAirJumps: 0

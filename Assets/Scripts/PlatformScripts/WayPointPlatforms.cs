@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WayPointPlatforms : MonoBehaviour
+public class WayPointPlatforms : MonoBehaviour, IPlatforms
 {
     [SerializeField, Tooltip("The waypoints that the platform fallows")]
     GameObject[] WayPoints;
@@ -27,6 +27,10 @@ public class WayPointPlatforms : MonoBehaviour
     List<Rigidbody> rigidbodies = new List<Rigidbody>();
     Vector3 lastPos;
     Transform _transform;
+    public void Activate()
+    {
+        active = true;
+    }
     void Start()
     {
         _transform = transform;
