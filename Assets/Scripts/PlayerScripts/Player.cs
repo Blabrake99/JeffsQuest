@@ -156,7 +156,6 @@ public abstract class Player : MonoBehaviour, IDamageble
             longJumping && _playerInput.y <= .05 && ONGround))
         {
             longJumping = false;
-            _velocity = new Vector3(0, _velocity.y, 0);
         }
         if (Gamepad.all.Count > 0)
         {
