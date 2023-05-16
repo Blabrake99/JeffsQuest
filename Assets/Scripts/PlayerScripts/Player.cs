@@ -40,6 +40,8 @@ public abstract class Player : MonoBehaviour, IDamageble
     [Header("For Rotation")]
     [SerializeField, Tooltip("The speed at which he rotates when he moves")] float turnSpeed = 5;
     [SerializeField,Range(.1f,2f), Tooltip("How long you have to hold the jump button to do a full jump")] float fullJumpTime = .3f;
+    [Header("Timers")]
+    [SerializeField, Range(.1f, 5f)] float longJumpStunTimer = .5f;
     [HideInInspector] public Vector3 RespawnPoint;
     protected float curSpeed;
     protected int jumpPhase;
@@ -60,7 +62,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected float _minGroundDotProduct, _minStairsDotProduct, _minClimbDotProduct, animatorWalkSpeed;
     protected int _stepsSinceLastGrounded, _stepsSinceLastJump;
     protected bool InWater => _submergence > 0f;
-    protected float _submergence, damagedTimer, _jumpHoldTimer, _shortJumpTimer;
+    protected float _submergence, damagedTimer, _jumpHoldTimer, _shortJumpTimer, _longJumpStunTimer;
     protected bool Swimming => _submergence >= swimThreshold;
     protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration, longJumping, LongJumpStunned;
     protected Animator anim;
@@ -123,7 +125,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             _rightAxis = ProjectDirectionOnPlane(Vector3.right, _upAxis);
             _forwardAxis = ProjectDirectionOnPlane(Vector3.forward, _upAxis);
         }
-        if (ONGround && _body.velocity.y <= 0 || Swimming)
+        if (ONGround && _body.velocity.y <= 0 && !LongJumpStunned || Swimming)
         {
             lastWallHit = null;
             anim.SetBool("Jump", false);
@@ -166,12 +168,23 @@ public abstract class Player : MonoBehaviour, IDamageble
         if (longJumping && ONSteep)
         {
             _velocity = -Vector3.forward * longJumpKnockBackDistance;
+            _playerInput = Vector3.zero;
             LongJumpStunned = true;
             longJumping = false;
+            anim.SetFloat("Velocity", 0);
+            _longJumpStunTimer = longJumpStunTimer;
         }
         if (LongJumpStunned && ONGround)
-            LongJumpStunned = false;
-        if (Gamepad.all.Count > 0)
+        {
+            _longJumpStunTimer -= Time.deltaTime;
+            anim.SetBool("LongJumpStunned", true);
+            if (_longJumpStunTimer <= 0)
+            {
+                anim.SetBool("LongJumpStunned", false);
+                LongJumpStunned = false;
+            }
+        }
+            if (Gamepad.all.Count > 0)
         {
             if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
                 _playerInput.x <= -.7f || _playerInput.y <= -.7f))

@@ -54607,6 +54607,7 @@ MonoBehaviour:
   swimThreshold: 0.5
   turnSpeed: 20
   fullJumpTime: 0.3
+  longJumpStunTimer: 0.5
   RespawnPoint: {x: 0, y: 0, z: 0}
 --- !u!4 &4345657066926797032
 Transform:
