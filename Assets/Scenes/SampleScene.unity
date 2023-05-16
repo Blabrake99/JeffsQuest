@@ -2307,7 +2307,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92a9c7af74a60d74cb621c067cee5c0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gravity: 15
+  gravity: 9.81
   range: 1000
 --- !u!4 &284270496
 Transform:
@@ -54562,8 +54562,9 @@ MonoBehaviour:
   maxClimbSpeed: 2
   maxSwimSpeed: 12
   maxCrouchSpeed: 1
-  longJumpHeight: 5
-  longJumpDistance: 15
+  longJumpHeight: 1.5
+  longJumpDistance: 20
+  longJumpKnockBackDistance: 7
   jumpSpeedMultiplyer: 1.1
   maxAcceleration: 27.2
   maxAirAcceleration: 19.7
@@ -54574,7 +54575,7 @@ MonoBehaviour:
   crouchDeceleration: 2
   crouchTurnAcceleration: 10.7
   maxRunSpeedAcceleration: 4
-  longJumpWalkDeceleration: 1.7
+  longJumpWalkDeceleration: 3
   jumpHeight: 5
   wallJumpHeight: 9.06
   maxAirJumps: 0

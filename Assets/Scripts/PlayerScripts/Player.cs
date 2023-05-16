@@ -109,10 +109,9 @@ public abstract class Player : MonoBehaviour, IDamageble
             if (Swimming)
                 _playerInput.z = actions.Player.UpDown.ReadValue<float>();
             _playerInput = Vector3.ClampMagnitude(_playerInput, 1f);
-
-            _desiredJump = actions.Player.Jump.ReadValue<float>();
             _desiredRunning = actions.Player.Run.ReadValue<float>();
         }
+        _desiredJump = actions.Player.Jump.ReadValue<float>();
         if (playerInputSpace)
         {
             _rightAxis = ProjectDirectionOnPlane(playerInputSpace.right, _upAxis);
@@ -161,6 +160,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             //this is so the player will do a little deceleration after long jumping 
             _velocity = new Vector3(_velocity.x / longJumpWalkDeceleration, _velocity.y, _velocity.z / longJumpWalkDeceleration);
+            isCrouchDeceleration = false; 
             longJumping = false;
         }
         if (longJumping && ONSteep)
