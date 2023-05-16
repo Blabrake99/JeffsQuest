@@ -8,7 +8,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Tooltip("Players IFrames")] protected float damageCooldown;
     [Header("Speed")]
     [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxWalkSpeed = 7f;
-    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f, maxCrouchSpeed = 3f, longJumpHeight = 3, longJumpDistance = 3;
+    [SerializeField, Range(0f, 100f), Tooltip("Max speed after Acceleration")] float maxRunSpeed = 10f, maxClimbSpeed = 2f, maxSwimSpeed = 5f, maxCrouchSpeed = 3f, longJumpHeight = 3, longJumpDistance = 3, longJumpKnockBackDistance = 7;
     [SerializeField, Range(1f, 3), Tooltip("This affect the wall jump distance (It's multiplicative)")] float jumpSpeedMultiplyer = 1.1f;
     [Header("Acceleration and deceleration")]
     [SerializeField, Range(0f, 100f), Tooltip("Acceleration for their respective names")] float maxAcceleration = 46.6f;
@@ -62,7 +62,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected bool InWater => _submergence > 0f;
     protected float _submergence, damagedTimer, _jumpHoldTimer, _shortJumpTimer;
     protected bool Swimming => _submergence >= swimThreshold;
-    protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration, longJumping;
+    protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration, longJumping, LongJumpStunned;
     protected Animator anim;
     protected int startHealth;
     protected PlayerAction actions;
@@ -103,13 +103,16 @@ public abstract class Player : MonoBehaviour, IDamageble
     }
     protected void Update()
     {
-        _playerInput = actions.Player.Move.ReadValue<Vector2>();
-        if (Swimming)
-            _playerInput.z = actions.Player.UpDown.ReadValue<float>();
-        _playerInput = Vector3.ClampMagnitude(_playerInput, 1f);
+        if (!LongJumpStunned)
+        {
+            _playerInput = actions.Player.Move.ReadValue<Vector2>();
+            if (Swimming)
+                _playerInput.z = actions.Player.UpDown.ReadValue<float>();
+            _playerInput = Vector3.ClampMagnitude(_playerInput, 1f);
 
-        _desiredJump = actions.Player.Jump.ReadValue<float>();
-        _desiredRunning = actions.Player.Run.ReadValue<float>();
+            _desiredJump = actions.Player.Jump.ReadValue<float>();
+            _desiredRunning = actions.Player.Run.ReadValue<float>();
+        }
         if (playerInputSpace)
         {
             _rightAxis = ProjectDirectionOnPlane(playerInputSpace.right, _upAxis);
@@ -160,6 +163,14 @@ public abstract class Player : MonoBehaviour, IDamageble
             _velocity = new Vector3(_velocity.x / longJumpWalkDeceleration, _velocity.y, _velocity.z / longJumpWalkDeceleration);
             longJumping = false;
         }
+        if (longJumping && ONSteep)
+        {
+            _velocity = -Vector3.forward * longJumpKnockBackDistance;
+            LongJumpStunned = true;
+            longJumping = false;
+        }
+        if (LongJumpStunned && ONGround)
+            LongJumpStunned = false;
         if (Gamepad.all.Count > 0)
         {
             if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
@@ -310,7 +321,8 @@ public abstract class Player : MonoBehaviour, IDamageble
         if (_playerInput.x > 0 || _playerInput.y > 0 || _playerInput.x < 0 || _playerInput.y < 0)
         {
             //Quaternion temp = transform.rotation;
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(_body.velocity.x, 0, _body.velocity.z)), Time.deltaTime * turnSpeed);
+            if(!LongJumpStunned)
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(_body.velocity.x, 0, _body.velocity.z)), Time.deltaTime * turnSpeed);
 
             //if (boneToRotate.rotation.y > leftRotation && temp.y < transform.rotation.y)
             //{
