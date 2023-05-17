@@ -9734,6 +9734,7 @@ MonoBehaviour:
     m_Bits: 11
   cameraAcceleration: 7.9
   YMin: -5
+  startDistance: 0
   speed: 0
 --- !u!1 &970650112
 GameObject:
@@ -54427,7 +54428,7 @@ MonoBehaviour:
   turnSpeed: 20
   fullJumpTime: 0.3
   longJumpStunTimer: 0.5
-  collectibleTimer: 1
+  collectibleTimer: 1.5
   RespawnPoint: {x: 0, y: 0, z: 0}
 --- !u!4 &4345657066926797032
 Transform:

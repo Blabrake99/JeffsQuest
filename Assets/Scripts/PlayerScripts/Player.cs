@@ -615,12 +615,15 @@ public abstract class Player : MonoBehaviour, IDamageble
     {
         gotCollectible = true;
         _playerInput = Vector3.zero;
+        transform.LookAt(new Vector3( playerInputSpace.position.x,0,playerInputSpace.position.z));
+        playerInputSpace.GetComponent<CameraScript>().distance = 3;
         anim.SetBool("GotCollectible", true);
         StartCoroutine(CollectibleAnim());
     }
     IEnumerator CollectibleAnim()
     {
         yield return new WaitForSeconds(collectibleTimer);
+        playerInputSpace.GetComponent<CameraScript>().distance = playerInputSpace.GetComponent<CameraScript>().startDistance;
         anim.SetBool("GotCollectible", false);
         gotCollectible = false;
     }

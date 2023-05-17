@@ -7,7 +7,7 @@ public class CameraScript : MonoBehaviour
 {
     PlayerAction actions;
     [SerializeField, Tooltip("The object the camera is focusing on")] private Transform focus;
-    [SerializeField, Range(1f, 20f), Tooltip("how far the camera's away from the object")] float distance = 5f;
+    [Range(1f, 20f), Tooltip("how far the camera's away from the object")] public float distance = 5f;
     [SerializeField, Tooltip("The zoom speed of the camera")] private float zoomSpeed = 10f;
     [SerializeField, Min(0f)] float focusRadius = 1f;
     [SerializeField, Range(0f, 1f)] float focusCentering = 0.5f;
@@ -18,6 +18,7 @@ public class CameraScript : MonoBehaviour
     [SerializeField, Tooltip("The layers that collide with the camera")] LayerMask obstructionMask = -1;
     [SerializeField, Tooltip("How the fast the camera accelerates or decelerates")] float cameraAcceleration = .5f;
     [SerializeField, Tooltip("If the player falls below this position the camera will just look at it")] float YMin = -10;
+    [HideInInspector] public float startDistance;
     public float speed;
     Camera regularCamera;
     Vector2 orbitAngles = new Vector2(45f, 0f);
@@ -35,6 +36,7 @@ public class CameraScript : MonoBehaviour
     }
     private void Start()
     {
+        startDistance = distance;
         GameManager.lockCursor();
         actions = new PlayerAction();
         regularCamera = GetComponent<Camera>();
