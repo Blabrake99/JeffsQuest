@@ -41,7 +41,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Tooltip("The speed at which he rotates when he moves")] float turnSpeed = 5;
     [SerializeField,Range(.1f,2f), Tooltip("How long you have to hold the jump button to do a full jump")] float fullJumpTime = .3f;
     [Header("Timers")]
-    [SerializeField, Range(.1f, 5f)] float longJumpStunTimer = .5f;
+    [SerializeField, Range(.1f, 5f)] float longJumpStunTimer = .5f, collectibleTimer = .5f;
     [HideInInspector] public Vector3 RespawnPoint;
     protected float curSpeed;
     protected int jumpPhase;
@@ -64,7 +64,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected bool InWater => _submergence > 0f;
     protected float _submergence, damagedTimer, _jumpHoldTimer, _shortJumpTimer, _longJumpStunTimer;
     protected bool Swimming => _submergence >= swimThreshold;
-    protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration, longJumping, LongJumpStunned;
+    protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration, longJumping, LongJumpStunned, gotCollectible;
     protected Animator anim;
     protected int startHealth;
     protected PlayerAction actions;
@@ -105,7 +105,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     }
     protected void Update()
     {
-        if (!LongJumpStunned)
+        if (!LongJumpStunned && !gotCollectible)
         {
             _playerInput = actions.Player.Move.ReadValue<Vector2>();
             if (Swimming)
@@ -611,6 +611,19 @@ public abstract class Player : MonoBehaviour, IDamageble
         yield return new WaitForSeconds(.5f);
         isInteracting = false;
     }
+    public void GotCollectible()
+    {
+        gotCollectible = true;
+        _playerInput = Vector3.zero;
+        anim.SetBool("GotCollectible", true);
+        StartCoroutine(CollectibleAnim());
+    }
+    IEnumerator CollectibleAnim()
+    {
+        yield return new WaitForSeconds(collectibleTimer);
+        anim.SetBool("GotCollectible", false);
+        gotCollectible = false;
+    }
     private void UpdateState()
     {
         _stepsSinceLastGrounded += 1;
@@ -725,6 +738,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     {
         return (stairsMask & (1 << layer)) == 0 ? _minGroundDotProduct : _minStairsDotProduct;
     }
+    #region collision
     protected void OnCollisionEnter(Collision collision)
     {
         EvaluateCollision(collision);
@@ -831,5 +845,5 @@ public abstract class Player : MonoBehaviour, IDamageble
 
         return false;
     }
-
+    #endregion
 }
