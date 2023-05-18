@@ -110,9 +110,9 @@ public class MovingPlatforms : MonoBehaviour, IPlatforms
                     if (rigidbodies[i] != null)
                     {
                         Rigidbody rb = rigidbodies[i];
-                        Vector3 vel = new Vector3((_transform.position.x - lastPos.x) + ((rb.velocity.x * Time.deltaTime) / 2),
+                        Vector3 vel = new Vector3((_transform.position.x - lastPos.x) + ((rb.velocity.x * Time.deltaTime)),
                                                   (_transform.position.y - lastPos.y) + ((rb.velocity.y * Time.deltaTime) / 2),
-                                                  (_transform.position.z - lastPos.z) + ((rb.velocity.z * Time.deltaTime) / 2));
+                                                  (_transform.position.z - lastPos.z) + ((rb.velocity.z * Time.deltaTime)));
                         rb.transform.Translate(vel, transform);
                     }
                 }
