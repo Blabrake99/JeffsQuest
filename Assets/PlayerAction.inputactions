@@ -130,6 +130,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "SwitchNext",
+                    "type": "Button",
+                    "id": "7ca40966-4c2d-43c7-8551-6d15c4c9620d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -570,6 +579,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Switch4",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b0317228-a1c6-4355-9e48-624b452d325a",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SwitchNext",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "719584d5-b889-4a5e-bcfa-856af7d3896b",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SwitchNext",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

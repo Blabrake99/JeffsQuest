@@ -5,9 +5,10 @@ using UnityEngine.InputSystem;
 public class PlayerSwitcher : MonoBehaviour
 {
     PlayerAction actions;
-    int currentIndex = 1;
+    int currentIndex = 0;
     Player _player;
     [SerializeField] GameObject[] CharactersToSwitchTo;
+    bool ispressed = false;
     void Start()
     {
         _player = FindObjectOfType<Player>();
@@ -18,36 +19,55 @@ public class PlayerSwitcher : MonoBehaviour
         actions.Player.Switch3.performed += Switch3;
         actions.Player.Switch4.performed += Switch4;
     }
+    private void Update()
+    {
+        float switchPressed = actions.Player.SwitchNext.ReadValue<float>();
+        if (switchPressed > .05f)
+            ispressed = true;
+        if(switchPressed < .05 && ispressed)
+        {
+            if(currentIndex == CharactersToSwitchTo.Length - 1)
+            {
+                currentIndex = 0;
+            }
+            else
+            {
+                currentIndex++;
+            }
+            Switcher(currentIndex);
+            ispressed = false;
+        }
+    }
     public void Switch1(InputAction.CallbackContext context)
     {
-        if(context.performed && currentIndex != 1)
+        if(context.performed && currentIndex != 0)
         {
             Switcher(0);
-            currentIndex = 1;
+            currentIndex = 0;
         }
     }
     public void Switch2(InputAction.CallbackContext context)
     {
-        if (context.performed && currentIndex != 2)
+        if (context.performed && currentIndex != 1)
         {
             Switcher(1);
-            currentIndex = 2;
+            currentIndex = 1;
         }
     }
     public void Switch3(InputAction.CallbackContext context)
     {
-        if (context.performed && currentIndex != 3)
+        if (context.performed && currentIndex != 2)
         {
             Switcher(2);
-            currentIndex = 3;
+            currentIndex = 2;
         }
     }
     public void Switch4(InputAction.CallbackContext context)
     {
-        if (context.performed && currentIndex != 4)
+        if (context.performed && currentIndex != 3)
         {
             Switcher(3);
-            currentIndex = 4;
+            currentIndex = 3;
         }
     }
     void Switcher(int index)

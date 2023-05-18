@@ -152,6 +152,15 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SwitchNext"",
+                    ""type"": ""Button"",
+                    ""id"": ""7ca40966-4c2d-43c7-8551-6d15c4c9620d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -594,6 +603,28 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
                     ""action"": ""Switch4"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b0317228-a1c6-4355-9e48-624b452d325a"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SwitchNext"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""719584d5-b889-4a5e-bcfa-856af7d3896b"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SwitchNext"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -616,6 +647,7 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
         m_Player_Switch2 = m_Player.FindAction("Switch2", throwIfNotFound: true);
         m_Player_Switch3 = m_Player.FindAction("Switch3", throwIfNotFound: true);
         m_Player_Switch4 = m_Player.FindAction("Switch4", throwIfNotFound: true);
+        m_Player_SwitchNext = m_Player.FindAction("SwitchNext", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -689,6 +721,7 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Switch2;
     private readonly InputAction m_Player_Switch3;
     private readonly InputAction m_Player_Switch4;
+    private readonly InputAction m_Player_SwitchNext;
     public struct PlayerActions
     {
         private @PlayerAction m_Wrapper;
@@ -707,6 +740,7 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
         public InputAction @Switch2 => m_Wrapper.m_Player_Switch2;
         public InputAction @Switch3 => m_Wrapper.m_Player_Switch3;
         public InputAction @Switch4 => m_Wrapper.m_Player_Switch4;
+        public InputAction @SwitchNext => m_Wrapper.m_Player_SwitchNext;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -758,6 +792,9 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
                 @Switch4.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch4;
                 @Switch4.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch4;
                 @Switch4.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch4;
+                @SwitchNext.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitchNext;
+                @SwitchNext.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitchNext;
+                @SwitchNext.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitchNext;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -804,6 +841,9 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
                 @Switch4.started += instance.OnSwitch4;
                 @Switch4.performed += instance.OnSwitch4;
                 @Switch4.canceled += instance.OnSwitch4;
+                @SwitchNext.started += instance.OnSwitchNext;
+                @SwitchNext.performed += instance.OnSwitchNext;
+                @SwitchNext.canceled += instance.OnSwitchNext;
             }
         }
     }
@@ -824,5 +864,6 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
         void OnSwitch2(InputAction.CallbackContext context);
         void OnSwitch3(InputAction.CallbackContext context);
         void OnSwitch4(InputAction.CallbackContext context);
+        void OnSwitchNext(InputAction.CallbackContext context);
     }
 }

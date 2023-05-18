@@ -97,6 +97,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     }
     protected void Start()
     {
+        playerInputSpace = FindObjectOfType<CameraScript>().transform;
         startHealth = health;
         RespawnPoint = transform.position;
         OnValidate();
