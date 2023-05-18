@@ -58,7 +58,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected bool ONGround => _groundContactCount > 0;
     protected bool ONSteep => _steepContactCount > 0;
     protected bool Climbing => _climbContactCount > 0 && _stepsSinceLastJump > 2;
-    protected int _jumpPhase;
+    public int _jumpPhase;
     protected float _minGroundDotProduct, _minStairsDotProduct, _minClimbDotProduct, animatorWalkSpeed;
     protected int _stepsSinceLastGrounded, _stepsSinceLastJump;
     protected bool InWater => _submergence > 0f;
@@ -847,6 +847,11 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
 
         return false;
+    }
+    public void Bounce(float height)
+    {
+        //_body.velocity += new Vector3(0, 1, 0) * height;
+        //jumpPhase = 0;
     }
     #endregion
 }

@@ -116,6 +116,42 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Switch1"",
+                    ""type"": ""Button"",
+                    ""id"": ""bc009f80-9d43-4415-9f09-ac460249dc3d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Switch2"",
+                    ""type"": ""Button"",
+                    ""id"": ""0ff4d2d6-d8af-4f2c-8503-5876ae83ea9c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Switch3"",
+                    ""type"": ""Button"",
+                    ""id"": ""d0d74d01-dae1-46c1-8fc8-f6e415c3f8ce"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Switch4"",
+                    ""type"": ""Button"",
+                    ""id"": ""e97c2e0b-3937-4f66-8464-f1ae04166954"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -470,6 +506,94 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
                     ""action"": ""UpDown"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""35ef35fe-2dc9-4b1a-a1e0-b78b2a86a275"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Switch1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""581919d9-42ae-4bdf-b2dd-0fbc690649c7"",
+                    ""path"": ""<Gamepad>/dpad/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Switch1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0c8c953f-5a76-4121-9b4a-a1d1855ae238"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Switch2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f8a739cf-518f-46c4-a04b-b26bb5240319"",
+                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Switch2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""69649703-c02a-4867-ac68-7a8cf39b1279"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Switch3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bcc1db19-eabb-46a1-b330-30e35cfbcb34"",
+                    ""path"": ""<Gamepad>/dpad/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Switch3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""45b5f819-1ac8-4eb7-a89f-f369d2027231"",
+                    ""path"": ""<Keyboard>/4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Switch4"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""60a059d5-6439-4f7e-a00a-050dce6771d1"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Switch4"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -488,6 +612,10 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
         m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
         m_Player_Crouch = m_Player.FindAction("Crouch", throwIfNotFound: true);
         m_Player_UpDown = m_Player.FindAction("UpDown", throwIfNotFound: true);
+        m_Player_Switch1 = m_Player.FindAction("Switch1", throwIfNotFound: true);
+        m_Player_Switch2 = m_Player.FindAction("Switch2", throwIfNotFound: true);
+        m_Player_Switch3 = m_Player.FindAction("Switch3", throwIfNotFound: true);
+        m_Player_Switch4 = m_Player.FindAction("Switch4", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -557,6 +685,10 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Pause;
     private readonly InputAction m_Player_Crouch;
     private readonly InputAction m_Player_UpDown;
+    private readonly InputAction m_Player_Switch1;
+    private readonly InputAction m_Player_Switch2;
+    private readonly InputAction m_Player_Switch3;
+    private readonly InputAction m_Player_Switch4;
     public struct PlayerActions
     {
         private @PlayerAction m_Wrapper;
@@ -571,6 +703,10 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
         public InputAction @Pause => m_Wrapper.m_Player_Pause;
         public InputAction @Crouch => m_Wrapper.m_Player_Crouch;
         public InputAction @UpDown => m_Wrapper.m_Player_UpDown;
+        public InputAction @Switch1 => m_Wrapper.m_Player_Switch1;
+        public InputAction @Switch2 => m_Wrapper.m_Player_Switch2;
+        public InputAction @Switch3 => m_Wrapper.m_Player_Switch3;
+        public InputAction @Switch4 => m_Wrapper.m_Player_Switch4;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -610,6 +746,18 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
                 @UpDown.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUpDown;
                 @UpDown.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUpDown;
                 @UpDown.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUpDown;
+                @Switch1.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch1;
+                @Switch1.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch1;
+                @Switch1.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch1;
+                @Switch2.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch2;
+                @Switch2.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch2;
+                @Switch2.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch2;
+                @Switch3.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch3;
+                @Switch3.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch3;
+                @Switch3.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch3;
+                @Switch4.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch4;
+                @Switch4.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch4;
+                @Switch4.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwitch4;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -644,6 +792,18 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
                 @UpDown.started += instance.OnUpDown;
                 @UpDown.performed += instance.OnUpDown;
                 @UpDown.canceled += instance.OnUpDown;
+                @Switch1.started += instance.OnSwitch1;
+                @Switch1.performed += instance.OnSwitch1;
+                @Switch1.canceled += instance.OnSwitch1;
+                @Switch2.started += instance.OnSwitch2;
+                @Switch2.performed += instance.OnSwitch2;
+                @Switch2.canceled += instance.OnSwitch2;
+                @Switch3.started += instance.OnSwitch3;
+                @Switch3.performed += instance.OnSwitch3;
+                @Switch3.canceled += instance.OnSwitch3;
+                @Switch4.started += instance.OnSwitch4;
+                @Switch4.performed += instance.OnSwitch4;
+                @Switch4.canceled += instance.OnSwitch4;
             }
         }
     }
@@ -660,5 +820,9 @@ public partial class @PlayerAction : IInputActionCollection2, IDisposable
         void OnPause(InputAction.CallbackContext context);
         void OnCrouch(InputAction.CallbackContext context);
         void OnUpDown(InputAction.CallbackContext context);
+        void OnSwitch1(InputAction.CallbackContext context);
+        void OnSwitch2(InputAction.CallbackContext context);
+        void OnSwitch3(InputAction.CallbackContext context);
+        void OnSwitch4(InputAction.CallbackContext context);
     }
 }

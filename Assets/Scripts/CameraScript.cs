@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 public class CameraScript : MonoBehaviour
 {
     PlayerAction actions;
-    [SerializeField, Tooltip("The object the camera is focusing on")] private Transform focus;
+    [SerializeField, Tooltip("The object the camera is focusing on")] public Transform focus;
     [Range(1f, 20f), Tooltip("how far the camera's away from the object")] public float distance = 5f;
     [SerializeField, Tooltip("The zoom speed of the camera")] private float zoomSpeed = 10f;
     [SerializeField, Min(0f)] float focusRadius = 1f;
