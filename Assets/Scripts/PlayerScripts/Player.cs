@@ -168,12 +168,17 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         if (longJumping && ONSteep)
         {
-            _velocity = -Vector3.forward * longJumpKnockBackDistance;
-            _playerInput = Vector3.zero;
-            LongJumpStunned = true;
-            longJumping = false;
-            anim.SetFloat("Velocity", 0);
-            _longJumpStunTimer = longJumpStunTimer;
+            RaycastHit hit;
+            // Does the ray intersect any objects excluding the player layer
+            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, Mathf.Infinity, probeMask))
+            {
+                _velocity = -Vector3.forward * longJumpKnockBackDistance;
+                _playerInput = Vector3.zero;
+                LongJumpStunned = true;
+                longJumping = false;
+                anim.SetFloat("Velocity", 0);
+                _longJumpStunTimer = longJumpStunTimer;
+            }
         }
         if (LongJumpStunned && ONGround)
         {
