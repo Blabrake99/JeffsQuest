@@ -2325,7 +2325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92a9c7af74a60d74cb621c067cee5c0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gravity: 9.81
+  gravity: 13
   range: 1000
 --- !u!4 &284270496
 Transform:
@@ -9707,7 +9707,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   focus: {fileID: 3991549056075789435}
-  distance: 7.09
+  distance: 9.02
   zoomSpeed: 10
   focusRadius: 1
   focusCentering: 0.5
