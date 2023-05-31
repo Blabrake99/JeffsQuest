@@ -39,7 +39,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Range(0.01f, 1f), Tooltip("This defines the minimum submergence required for swimming")] float swimThreshold = 0.5f;
     [Header("For Rotation")]
     [SerializeField, Tooltip("The speed at which he rotates when he moves")] float turnSpeed = 5;
-    [SerializeField,Range(.1f,2f), Tooltip("How long you have to hold the jump button to do a full jump")] float fullJumpTime = .3f;
+    [SerializeField, Range(.1f, 2f), Tooltip("How long you have to hold the jump button to do a full jump")] float fullJumpTime = .3f;
     [Header("Timers")]
     [SerializeField, Range(.1f, 5f)] float longJumpStunTimer = .5f, collectibleTimer = .5f;
     [HideInInspector] public Vector3 RespawnPoint;
@@ -69,6 +69,9 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected int startHealth;
     protected PlayerAction actions;
     public int Health { get { return health; } set { health = value; } }
+    Vector3 _gravity;
+    bool _bouncing;
+    float _bounceHeight;
     private void OnValidate()
     {
         _minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
@@ -153,6 +156,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected void FixedUpdate()
     {
         var gravity = CustomGravity.GetGravity(_body.position, out _upAxis);
+        _gravity = gravity;
         UpdateState();
         if (InWater)
         {
@@ -163,7 +167,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             //this is so the player will do a little deceleration after long jumping 
             _velocity = new Vector3(_velocity.x / longJumpWalkDeceleration, _velocity.y, _velocity.z / longJumpWalkDeceleration);
-            isCrouchDeceleration = false; 
+            isCrouchDeceleration = false;
             longJumping = false;
         }
         if (longJumping && ONSteep)
@@ -190,7 +194,7 @@ public abstract class Player : MonoBehaviour, IDamageble
                 LongJumpStunned = false;
             }
         }
-            if (Gamepad.all.Count > 0)
+        if (Gamepad.all.Count > 0)
         {
             if ((_playerInput.x >= .7f || _playerInput.y >= .7f ||
                 _playerInput.x <= -.7f || _playerInput.y <= -.7f))
@@ -284,6 +288,11 @@ public abstract class Player : MonoBehaviour, IDamageble
                 }
             }
         }
+        if(_bouncing)
+        {
+            BounceUp(_bounceHeight);
+            jumpPhase = 0;
+        }
         AdjustVelocity();
         // && !ONSteep
         if (_desiredJump > 0.05f && !jumping && !isCrouchDeceleration)
@@ -293,17 +302,17 @@ public abstract class Player : MonoBehaviour, IDamageble
             jumping = true;
             _shortJumpTimer = 0;
         }
-        if(_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && _shortJumpTimer < .07f)
+        if (_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && _shortJumpTimer < .07f)
         {
             _velocity -= new Vector3(0, 1, 0);
             _shortJumpTimer += Time.deltaTime;
         }
-        if(_desiredJump > 0 && jumping && !ONGround)
+        if (_desiredJump > 0 && jumping && !ONGround)
         {
             _jumpHoldTimer += Time.deltaTime;
         }
         //|| _desiredJump < .05f && ONSteep
-        if (_desiredJump < .05f && ONGround )
+        if (_desiredJump < .05f && ONGround)
         {
             jumping = false;
             _jumpHoldTimer = 0;
@@ -340,7 +349,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         if (_playerInput.x > 0 || _playerInput.y > 0 || _playerInput.x < 0 || _playerInput.y < 0)
         {
             //Quaternion temp = transform.rotation;
-            if(!LongJumpStunned)
+            if (!LongJumpStunned)
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(_body.velocity.x, 0, _body.velocity.z)), Time.deltaTime * turnSpeed);
 
             //if (boneToRotate.rotation.y > leftRotation && temp.y < transform.rotation.y)
@@ -417,7 +426,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     private void Jump(Vector3 gravity, bool longJumping)
     {
         Vector3 jumpDirection;
-        
+
         var jumpSpeed = (longJumping) ? Mathf.Sqrt(2f * gravity.magnitude * longJumpHeight) : Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
         if (ONGround)
         {
@@ -621,7 +630,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     {
         gotCollectible = true;
         _playerInput = Vector3.zero;
-        transform.LookAt(new Vector3( playerInputSpace.position.x,0,playerInputSpace.position.z));
+        transform.LookAt(new Vector3(playerInputSpace.position.x, 0, playerInputSpace.position.z));
         playerInputSpace.GetComponent<CameraScript>().distance = 3;
         anim.SetBool("GotCollectible", true);
         StartCoroutine(CollectibleAnim());
@@ -856,8 +865,32 @@ public abstract class Player : MonoBehaviour, IDamageble
     }
     public void Bounce(float height)
     {
-        //_body.velocity += new Vector3(0, 1, 0) * height;
-        //jumpPhase = 0;
+        _bounceHeight = height;
+        _bouncing = true;
+    }
+    private void BounceUp(float Height)
+    {
+        Vector3 jumpDirection;
+
+        var jumpSpeed = Mathf.Sqrt(2f * _gravity.magnitude * Height);
+
+        jumpDirection = _contactNormal;
+
+        _stepsSinceLastJump = 0;
+
+        _jumpPhase += 1;
+
+        jumpDirection = (jumpDirection + _upAxis).normalized;
+        var alignedSpeed = Vector3.Dot(_velocity, jumpDirection);
+        if (alignedSpeed > 0f)
+        {
+            jumpSpeed = Mathf.Max(jumpSpeed - _velocity.y, 0f);
+            jumpSpeed *= jumpSpeedMultiplyer;
+        }
+        print(jumpDirection + " " + jumpSpeed);
+        _velocity += jumpDirection * jumpSpeed;
+        _bounceHeight = 0;
+        _bouncing = false;
     }
     #endregion
 }
