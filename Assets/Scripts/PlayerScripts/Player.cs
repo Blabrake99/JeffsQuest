@@ -62,7 +62,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected float _minGroundDotProduct, _minStairsDotProduct, _minClimbDotProduct, animatorWalkSpeed;
     protected int _stepsSinceLastGrounded, _stepsSinceLastJump;
     protected bool InWater => _submergence > 0f;
-    protected float _submergence, damagedTimer, _jumpHoldTimer, _shortJumpTimer, _longJumpStunTimer;
+    protected float _submergence, damagedTimer, _jumpHoldTimer, _longJumpStunTimer;
     protected bool Swimming => _submergence >= swimThreshold;
     protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration, longJumping, LongJumpStunned, gotCollectible;
     protected Animator anim;
@@ -294,29 +294,52 @@ public abstract class Player : MonoBehaviour, IDamageble
             jumpPhase = 0;
         }
         AdjustVelocity();
-        // && !ONSteep
-        if (_desiredJump > 0.05f && !jumping && !isCrouchDeceleration)
+        if(ONGround && _desiredJump > 0 && !isCrouchDeceleration)
         {
             anim.SetBool("Jump", true);
-            Jump(gravity, false);
             jumping = true;
-            _shortJumpTimer = 0;
+            _jumpHoldTimer = fullJumpTime;
+            _velocity += JumpDirection() * jumpHeight;
         }
-        if (_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && _shortJumpTimer < .07f)
+        if(_desiredJump > 0 && jumping && !longJumping)
         {
-            _velocity -= new Vector3(0, 1, 0);
-            _shortJumpTimer += Time.deltaTime;
+            if(_jumpHoldTimer > 0)
+            {
+                _velocity += JumpDirection() * jumpHeight;
+                _jumpHoldTimer -= Time.deltaTime;
+            }
+            else
+            {
+                jumping = false;
+            }
         }
-        if (_desiredJump > 0 && jumping && !ONGround)
-        {
-            _jumpHoldTimer += Time.deltaTime;
-        }
-        //|| _desiredJump < .05f && ONSteep
-        if (_desiredJump < .05f && ONGround)
+        if(_desiredJump < 0.05)
         {
             jumping = false;
-            _jumpHoldTimer = 0;
         }
+        // && !ONSteep
+        //if (_desiredJump > 0.05f && !jumping && !isCrouchDeceleration)
+        //{
+        //    anim.SetBool("Jump", true);
+        //    Jump(gravity, false);
+        //    jumping = true;
+        //    _shortJumpTimer = 0;
+        //}
+        //if (_desiredJump < 0.05f && jumping && _jumpHoldTimer < fullJumpTime && _shortJumpTimer < .07f)
+        //{
+        //    _velocity -= new Vector3(0, 1, 0);
+        //    _shortJumpTimer += Time.deltaTime;
+        //}
+        //if (_desiredJump > 0 && jumping && !ONGround)
+        //{
+        //    _jumpHoldTimer += Time.deltaTime;
+        //}
+        ////|| _desiredJump < .05f && ONSteep
+        //if (_desiredJump < .05f && ONGround)
+        //{
+        //    jumping = false;
+        //    _jumpHoldTimer = 0;
+        //}
         if (Climbing)
         {
             _velocity -= _contactNormal * (maxClimbAcceleration * 0.9f * Time.deltaTime);
@@ -422,6 +445,55 @@ public abstract class Player : MonoBehaviour, IDamageble
         _previousConnectedBody = _connectedBody;
         _connectedBody = null;
         _submergence = 0f;
+    }
+    private Vector3 JumpDirection()
+    {
+        Vector3 jumpDirection = Vector3.zero;
+        if (ONGround)
+        {
+            jumpDirection = _contactNormal;
+        }
+        else if (ONSteep)
+        {
+            if (lastWallHit == null)
+            {
+                jumpDirection = _steepNormal;
+            }
+            else
+            {
+                if (lastWallHit.layer != 8)
+                {
+                    _velocity.y = 0;
+                    jumpDirection = _steepNormal;
+
+                }
+                else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
+                {
+
+                    if (_jumpPhase == 0)
+                    {
+                        _jumpPhase = 1;
+                    }
+                    jumpDirection = Vector3.up;
+                }
+            }
+            _jumpPhase = 0;
+        }
+        else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
+        {
+            if (_jumpPhase == 0)
+            {
+                _jumpPhase = 1;
+            }
+
+            jumpDirection = _contactNormal;
+
+        }
+        _stepsSinceLastJump = 0;
+
+        jumpDirection = (jumpDirection + _upAxis).normalized;
+        return (jumpDirection);
+        
     }
     private void Jump(Vector3 gravity, bool longJumping)
     {

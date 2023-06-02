@@ -77122,6 +77122,18 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5499819446308878208, guid: 208286e4eeb05524ca9187d62933faf1, type: 3}
+      propertyPath: jumpHeight
+      value: 1.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5499819446308878208, guid: 208286e4eeb05524ca9187d62933faf1, type: 3}
+      propertyPath: fullJumpTime
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5499819446308878208, guid: 208286e4eeb05524ca9187d62933faf1, type: 3}
+      propertyPath: probeDistance
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5499819446308878208, guid: 208286e4eeb05524ca9187d62933faf1, type: 3}
       propertyPath: playerInputSpace
       value: 
       objectReference: {fileID: 963194228}
