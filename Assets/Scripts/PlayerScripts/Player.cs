@@ -64,7 +64,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     protected bool InWater => _submergence > 0f;
     protected float _submergence, damagedTimer, _jumpHoldTimer, _longJumpStunTimer;
     protected bool Swimming => _submergence >= swimThreshold;
-    protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration, longJumping, LongJumpStunned, gotCollectible;
+    protected bool jumping, isInteracting, isCrouching, isCrouchDeceleration, longJumping, LongJumpStunned, gotCollectible, jumpButtonUp;
     protected Animator anim;
     protected int startHealth;
     protected PlayerAction actions;
@@ -288,18 +288,22 @@ public abstract class Player : MonoBehaviour, IDamageble
                 }
             }
         }
-        if(_bouncing)
+        if (_bouncing)
         {
             BounceUp(_bounceHeight);
             jumpPhase = 0;
         }
         AdjustVelocity();
-        if(ONGround && _desiredJump > 0 && !isCrouchDeceleration)
+        if (ONGround && _desiredJump > 0 && !isCrouchDeceleration && !jumpButtonUp)
         {
             anim.SetBool("Jump", true);
             jumping = true;
             _jumpHoldTimer = fullJumpTime;
             _velocity += JumpDirection() * jumpHeight;
+        }
+        if (ONGround && _desiredJump < 0.5f)
+        {
+            jumpButtonUp = false;
         }
         if(_desiredJump > 0 && jumping && !longJumping)
         {
@@ -311,6 +315,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             else
             {
                 jumping = false;
+                jumpButtonUp = true;
             }
         }
         if(_desiredJump < 0.05)
@@ -371,28 +376,8 @@ public abstract class Player : MonoBehaviour, IDamageble
         _body.velocity = _velocity;
         if (_playerInput.x > 0 || _playerInput.y > 0 || _playerInput.x < 0 || _playerInput.y < 0)
         {
-            //Quaternion temp = transform.rotation;
             if (!LongJumpStunned)
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(new Vector3(_body.velocity.x, 0, _body.velocity.z)), Time.deltaTime * turnSpeed);
-
-            //if (boneToRotate.rotation.y > leftRotation && temp.y < transform.rotation.y)
-            //{
-            //boneToRotate.rotation = Quaternion.Slerp(boneToRotate.rotation, Quaternion.Euler(72.649f, leftRotation, -94.082f), 1 * Time.deltaTime);
-            //boneToRotate.rotation = Quaternion.Euler(boneToRotate.localEulerAngles.x, Mathf.Lerp(boneToRotate.localEulerAngles.y, leftRotation, Time.deltaTime * 2), boneToRotate.localEulerAngles.z);
-            //boneToRotate.eulerAngles = new Vector3( boneToRotate.rotation.x, Mathf.Lerp(boneToRotate.rotation.y, leftRotation,Time.deltaTime * 2), boneToRotate.rotation.z);
-            //}
-            //if (boneToRotate.rotation.y < rightRotation && temp.y > transform.rotation.y)
-            //{
-            //    boneToRotate.rotation = Quaternion.Slerp(boneToRotate.rotation, Quaternion.Euler(72.649f, rightRotation, -94.082f), 1 * Time.deltaTime );
-            //    //boneToRotate.rotation = Quaternion.Euler(boneToRotate.localEulerAngles.x, Mathf.Lerp(boneToRotate.localEulerAngles.y, rightRotation, Time.deltaTime * 2), boneToRotate.localEulerAngles.z);
-            //    //boneToRotate.eulerAngles = new Vector3(boneToRotate.rotation.x, Mathf.Lerp(boneToRotate.rotation.y, rightRotation, Time.deltaTime * 2), boneToRotate.rotation.z);
-            //}
-            //if (temp.y == transform.rotation.y && transform.rotation.y > -94 ||
-            //    temp.y == transform.rotation.y && transform.rotation.y < -94)
-            //{
-            //    //boneToRotate.rotation = Quaternion.Euler(boneToRotate.localEulerAngles.x, Mathf.Lerp(boneToRotate.localEulerAngles.y, -94.574f, Time.deltaTime * 2), boneToRotate.localEulerAngles.z);
-            //    //boneToRotate.eulerAngles = new Vector3(boneToRotate.rotation.x, Mathf.Lerp(boneToRotate.rotation.y, -94.574f, Time.deltaTime * 2), boneToRotate.rotation.z);
-            //}
         }
 
         ClearState();
