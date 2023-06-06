@@ -72,6 +72,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     Vector3 _gravity;
     bool _bouncing;
     float _bounceHeight;
+    HealthBar bar;
     private void OnValidate()
     {
         _minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
@@ -84,7 +85,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             damagedTimer = Time.time + damageCooldown;
             Health -= amount;
-            //bar.SetHealth(Health);
+            bar.UpdateHealthBar(Health);
         }
         if (Health < 1)
         {
@@ -96,6 +97,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         _body = GetComponent<Rigidbody>();
         _body.useGravity = false;
         anim = GetComponent<Animator>();
+        bar = FindObjectOfType<HealthBar>();
         OnValidate();
     }
     protected void Start()
@@ -106,6 +108,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         OnValidate();
         actions = new PlayerAction();
         actions.Player.Enable();
+        actions.Player.Interact.performed += OnInteract;
     }
     protected void Update()
     {
@@ -295,7 +298,7 @@ public abstract class Player : MonoBehaviour, IDamageble
         }
         AdjustVelocity();
         if (ONGround && _desiredJump > 0 && !isCrouchDeceleration && !jumpButtonUp)
-        {
+        {          
             anim.SetBool("Jump", true);
             jumping = true;
             _jumpHoldTimer = fullJumpTime;
@@ -652,13 +655,14 @@ public abstract class Player : MonoBehaviour, IDamageble
         longJumping = false;
         isCrouchDeceleration = false;
         Health = startHealth;
-        //bar.SetHealth(Health);
+        bar.UpdateHealthBar(Health);
         transform.position = RespawnPoint;
     }
     public void OnInteract(InputAction.CallbackContext context)
     {
         if (context.performed && !isInteracting)
         {
+            Damage(1);
             interact();
         }
     }
