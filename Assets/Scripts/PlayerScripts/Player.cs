@@ -112,6 +112,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     }
     protected void Update()
     {
+        //transform.localScale = Vector3.one;
         if (!LongJumpStunned && !gotCollectible)
         {
             _playerInput = actions.Player.Move.ReadValue<Vector2>();
@@ -356,7 +357,8 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             _velocity += gravity * ((1f - buoyancy * _submergence) * Time.deltaTime);
         }
-        else if (ONGround && _velocity.sqrMagnitude < 0.01f)
+        else 
+        if (ONGround && _velocity.sqrMagnitude < 0.01f)
         {
             _velocity +=
                 _contactNormal *
@@ -488,11 +490,11 @@ public abstract class Player : MonoBehaviour, IDamageble
         Vector3 jumpDirection;
 
         var jumpSpeed = (longJumping) ? Mathf.Sqrt(2f * gravity.magnitude * longJumpHeight) : Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
-        //if (ONGround)
-        //{
-        //    jumpDirection = _contactNormal;
-        //}else
-        if (ONSteep)
+        if (ONGround)
+        {
+            jumpDirection = _contactNormal;
+        }
+        else if (ONSteep)
         {
             if (lastWallHit == null)
             {
@@ -500,13 +502,13 @@ public abstract class Player : MonoBehaviour, IDamageble
             }
             else
             {
-                //if (lastWallHit.layer != 8)
-                //{
-                //    _velocity.y = 0;
-                //    jumpDirection = _steepNormal;
+                if (lastWallHit.layer != 8)
+                {
+                    _velocity.y = 0;
+                    jumpDirection = _steepNormal;
 
-                //}else 
-                if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
+                }
+                else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
                 {
 
                     if (_jumpPhase == 0)
