@@ -488,11 +488,11 @@ public abstract class Player : MonoBehaviour, IDamageble
         Vector3 jumpDirection;
 
         var jumpSpeed = (longJumping) ? Mathf.Sqrt(2f * gravity.magnitude * longJumpHeight) : Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
-        if (ONGround)
-        {
-            jumpDirection = _contactNormal;
-        }
-        else if (ONSteep)
+        //if (ONGround)
+        //{
+        //    jumpDirection = _contactNormal;
+        //}else
+        if (ONSteep)
         {
             if (lastWallHit == null)
             {
@@ -500,13 +500,13 @@ public abstract class Player : MonoBehaviour, IDamageble
             }
             else
             {
-                if (lastWallHit.layer != 8)
-                {
-                    _velocity.y = 0;
-                    jumpDirection = _steepNormal;
+                //if (lastWallHit.layer != 8)
+                //{
+                //    _velocity.y = 0;
+                //    jumpDirection = _steepNormal;
 
-                }
-                else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
+                //}else 
+                if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
                 {
 
                     if (_jumpPhase == 0)

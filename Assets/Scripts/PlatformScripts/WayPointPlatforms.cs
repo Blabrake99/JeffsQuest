@@ -18,12 +18,16 @@ public class WayPointPlatforms : MonoBehaviour, IPlatforms
     [SerializeField, Tooltip("If you want it to activate when step on")]
     bool StepOnToActivate;
 
+    [SerializeField, Tooltip("How long it takes to start the platform")]
+    float startTimer = 0f;
+
     GameObject[] WaypointsToGoTo;
     GameObject NextPlatform;
     int ArrayIndex = 0;
     [HideInInspector]
     public bool isSteppedOn;
     bool AtDestination = true;
+    float timer;
     List<Rigidbody> rigidbodies = new List<Rigidbody>();
     Vector3 lastPos;
     Transform _transform;
@@ -35,11 +39,17 @@ public class WayPointPlatforms : MonoBehaviour, IPlatforms
     {
         _transform = transform;
         GoToFirstWayPoint();
+        timer = startTimer;
     }
     void Update()
     {
         if (active)
         {
+            if (startTimer > 0f)
+            {
+                startTimer -= Time.fixedDeltaTime;
+                return;
+            }
             Move();
 
             if (rigidbodies.Count > 0)

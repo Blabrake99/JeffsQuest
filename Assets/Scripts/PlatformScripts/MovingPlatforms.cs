@@ -41,6 +41,9 @@ public class MovingPlatforms : MonoBehaviour, IPlatforms
     [Tooltip("If you want it to activate when step on")]
     public bool StepOnToActivate;
 
+    [SerializeField, Tooltip("How long it takes to start the platform")]
+    float startTimer = 0f;
+
     [Tooltip("If this is true the moving platforms active and moving")]
     public bool active = true;
 
@@ -55,6 +58,7 @@ public class MovingPlatforms : MonoBehaviour, IPlatforms
 
     Vector3 lastPosition, lastMove;
     float stopTimer;
+    float timer;
     bool once;
     List<Rigidbody> rigidbodies = new List<Rigidbody>();
     Vector3 lastPos;
@@ -69,6 +73,7 @@ public class MovingPlatforms : MonoBehaviour, IPlatforms
         _transform = transform;
         StartPoint = _transform.position;
         lastPos = _transform.position;
+        timer = startTimer;
         if (MoveY)
             EndPointY = StartPoint.y + DistanceToMoveY;
 
@@ -83,6 +88,11 @@ public class MovingPlatforms : MonoBehaviour, IPlatforms
     {
         if (active)
         {
+            if(startTimer > 0f)
+            {
+                startTimer -= Time.fixedDeltaTime;
+                return;
+            }
             if (!StepOnToActivate && !GoBackToStart)
             {
                 Move();
@@ -424,7 +434,7 @@ public class MovingPlatforms : MonoBehaviour, IPlatforms
     private void OnCollisionEnter(Collision col)
     {
         Rigidbody rb = col.collider.GetComponent<Rigidbody>();
-        if (rb != null)
+        if (rb != null && !rigidbodies.Contains(rb))
         {
             Add(rb);
         }
