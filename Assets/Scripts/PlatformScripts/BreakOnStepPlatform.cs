@@ -11,6 +11,7 @@ public class BreakOnStepPlatform : MonoBehaviour, IPlatforms
     float timer;
     [SerializeField] Collider collider;
     bool turnedOff;
+    Renderer rend;
     public void Activate()
     {
         throw new System.NotImplementedException();
@@ -20,6 +21,10 @@ public class BreakOnStepPlatform : MonoBehaviour, IPlatforms
     {
         throw new System.NotImplementedException();
     }
+    private void Start()
+    {
+        rend = GetComponent<Renderer>();
+    }
     void Update()
     {
         if(active)
@@ -28,12 +33,14 @@ public class BreakOnStepPlatform : MonoBehaviour, IPlatforms
             if(timer < 0 && !turnedOff)
             {
                 collider.enabled = false;
+                rend.enabled = false;
                 timer = StayTurnedOffFor;
                 turnedOff = true;
             }
             if (timer < 0 && turnedOff)
             {
                 collider.enabled = true;
+                rend.enabled = true;
                 timer = StayTurnedOffFor;
                 turnedOff = false;
                 active = false;
