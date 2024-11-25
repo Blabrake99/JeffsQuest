@@ -35,6 +35,10 @@ public class WayPointPlatforms : MonoBehaviour, IPlatforms
     {
         active = true;
     }
+    public void DeActivate()
+    {
+        active = false;
+    }
     void Start()
     {
         _transform = transform;

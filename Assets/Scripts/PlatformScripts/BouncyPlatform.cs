@@ -10,6 +10,10 @@ public class BouncyPlatform : MonoBehaviour, IPlatforms
     {
         active = true;
     }
+    public void DeActivate()
+    {
+        active = false;
+    }
     private void OnTriggerEnter(Collider col)
     {
         Player player = col.GetComponent<Player>();

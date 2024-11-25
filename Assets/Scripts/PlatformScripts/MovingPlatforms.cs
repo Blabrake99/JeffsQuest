@@ -67,6 +67,10 @@ public class MovingPlatforms : MonoBehaviour, IPlatforms
     {
         active = true;
     }
+    public void DeActivate()
+    {
+        active = false;
+    }
     #region MonoBehaviour functions
     void Start()
     {
@@ -442,7 +446,7 @@ public class MovingPlatforms : MonoBehaviour, IPlatforms
     private void OnCollisionStay(Collision col)
     {
         Rigidbody rb = col.collider.GetComponent<Rigidbody>();
-        if (rb != null && !rigidbodies.Contains(rb))
+        if (rb != null)
         {
             Add(rb);
         }
