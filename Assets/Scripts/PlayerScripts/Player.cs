@@ -18,6 +18,7 @@ public abstract class Player : MonoBehaviour, IDamageble
     [SerializeField, Range(1, 3), Tooltip("deceleration for the player after long jumping the lower the number the longer he walks for")] float longJumpWalkDeceleration = 1.7f;
     [Header("For Jumping")]
     [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float jumpHeight = 1.6f;
+    [SerializeField] float maxJumpHeight = 1.6f;
     [SerializeField, Range(0f, 10f), Tooltip("How high the player jumps")] float wallJumpHeight = 6;
     [SerializeField, Range(0, 5), Tooltip("How many jumps the players allowed to do")] int maxAirJumps = 1;
     [SerializeField, Range(0f, 90f), Tooltip("This is the max ground angle to tell if the players Grounded or not")]
@@ -488,7 +489,10 @@ public abstract class Player : MonoBehaviour, IDamageble
     private void Jump(Vector3 gravity, bool longJumping)
     {
         Vector3 jumpDirection;
-
+        if(jumpHeight != maxJumpHeight)
+        {
+            jumpHeight = maxJumpHeight;
+        }
         var jumpSpeed = (longJumping) ? Mathf.Sqrt(2f * gravity.magnitude * longJumpHeight) : Mathf.Sqrt(2f * gravity.magnitude * jumpHeight);
         if (ONGround)
         {
