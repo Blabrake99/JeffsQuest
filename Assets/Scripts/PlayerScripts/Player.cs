@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 public abstract class Player : MonoBehaviour, IDamageble
 {
     [SerializeField, Tooltip("Players health")] protected int health = 6;
@@ -181,7 +182,7 @@ public abstract class Player : MonoBehaviour, IDamageble
             // Does the ray intersect any objects excluding the player layer
             if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, Mathf.Infinity, probeMask))
             {
-                _velocity = -Vector3.forward * longJumpKnockBackDistance;
+                _velocity = -transform.TransformDirection(Vector3.forward) * longJumpKnockBackDistance;
                 _playerInput = Vector3.zero;
                 LongJumpStunned = true;
                 longJumping = false;
@@ -502,14 +503,16 @@ public abstract class Player : MonoBehaviour, IDamageble
         {
             if (lastWallHit == null)
             {
-                jumpDirection = _steepNormal;
+                jumpDirection = _contactNormal;
+                //jumpDirection = _steepNormal;
             }
             else
             {
                 if (lastWallHit.layer != 8)
                 {
                     _velocity.y = 0;
-                    jumpDirection = _steepNormal;
+                    jumpDirection = _contactNormal;
+                    //jumpDirection = _steepNormal;
 
                 }
                 else if (maxAirJumps > 0 && _jumpPhase <= maxAirJumps)
