@@ -70,7 +70,6 @@ public class NewPlayerScript : MonoBehaviour
         {
             anim.SetBool("Jump", false);
             _velocity.y = 0;
-            jumping = false;
         }
         if (actions.Player.Crouch.ReadValue<float>() > 0 && ONGround)
         {
@@ -88,17 +87,7 @@ public class NewPlayerScript : MonoBehaviour
             lastPlayerInput = _playerInput;
             FixWalkingAnim(false);
         }
-        Vector3 move = Vector3.zero;
-        if (ONGround)
-        {
-            move = new Vector3(_playerInput.x, 0, _playerInput.y);
-        }
-        else
-        {
-            move = new Vector3(lastPlayerInput.x, 0, lastPlayerInput.y);
-           // _characterController.Move(transform.forward * Time.deltaTime * (curSpeed/1.5f));
-            anim.SetFloat("Velocity", 0);
-        }
+        Vector3 move = new Vector3(_playerInput.x, 0, _playerInput.y);
         _characterController.Move(move * Time.deltaTime * curSpeed);
         //if player is using gamepad
         if (Gamepad.all.Count > 0)
@@ -174,7 +163,7 @@ public class NewPlayerScript : MonoBehaviour
             {
                 if (!isCrouching)
                 {
-                    curSpeed = (_desiredRunning > 0) ? maxRunSpeed : maxWalkSpeed;
+                    curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxWalkSpeed, maxAcceleration * Time.deltaTime) : Mathf.Lerp(curSpeed, maxRunSpeed, maxRunSpeedAcceleration * Time.deltaTime);
                 }
                 else
                 {
@@ -221,7 +210,7 @@ public class NewPlayerScript : MonoBehaviour
         if (_desiredJump < 0.05)
         {
             jumping = false;
-                        anim.SetFloat("Velocity", 0);
+            anim.SetFloat("Velocity", 0);
         }
         _velocity.y += gravity * Time.deltaTime;
         _characterController.Move(_velocity * Time.deltaTime);
