@@ -96,7 +96,7 @@ public class NewPlayerScript : MonoBehaviour
         else
         {
             move = new Vector3(lastPlayerInput.x, 0, lastPlayerInput.y);
-            _characterController.Move(transform.forward * Time.deltaTime * (curSpeed/1.5f));
+           // _characterController.Move(transform.forward * Time.deltaTime * (curSpeed/1.5f));
             anim.SetFloat("Velocity", 0);
         }
         _characterController.Move(move * Time.deltaTime * curSpeed);
