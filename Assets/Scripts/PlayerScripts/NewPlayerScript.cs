@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.UI;
@@ -22,7 +23,7 @@ public class NewPlayerScript : MonoBehaviour
     [SerializeField, Range(1f, 3), Tooltip("This affect the wall jump distance (It's multiplicative)")] float jumpSpeedMultiplyer = 1.1f;
     [SerializeField, Range(1, 3), Tooltip("deceleration for the player after long jumping the lower the number the longer he walks for")] float longJumpWalkDeceleration = 1.7f;
     [Header("For Rotation")]
-    [SerializeField, Tooltip("The speed at which he rotates when he moves")] float turnSpeed = 5;
+    [SerializeField, Tooltip("The speed at which he rotates when he moves")] float turnSpeed = .05f;
     [SerializeField, Range(.1f, 2f), Tooltip("How long you have to hold the jump button to do a full jump")] float fullJumpTime = .3f;
     [Header("Timers")]
     [SerializeField, Range(.1f, 5f)] float longJumpStunTimer = .5f, collectibleTimer = .5f;
@@ -38,12 +39,12 @@ public class NewPlayerScript : MonoBehaviour
     protected PlayerAction actions;
     protected Animator anim;
     protected GameObject lastWallHit;
-    protected float animatorWalkSpeed, _jumpHoldTimer, _longJumpStunTimer;
+    protected float animatorWalkSpeed, _jumpHoldTimer, _longJumpStunTimer, rotVelocity;
     protected Vector3 _upAxis, _rightAxis, _forwardAxis;
     protected float _desiredJump, _desiredRunning;
     protected Vector3 _velocity;
     [HideInInspector] public bool ONGround;
-    public Vector2 lastPlayerInput;
+
     void Awake()
     {
         //_body = GetComponent<Rigidbody>();
@@ -92,13 +93,18 @@ public class NewPlayerScript : MonoBehaviour
             anim.SetBool("Crouch", false);
             longJumping = false;
         }
-        if (_desiredJump != 0 && _characterController.isGrounded)
-        {
-            lastPlayerInput = _playerInput;
-            FixWalkingAnim(false);
-        }
+        //if (_desiredJump != 0 && _characterController.isGrounded)
+        //{
+        //    lastPlayerInput = _playerInput;
+        //    FixWalkingAnim(false);
+        //}
         Vector3 move = forwardRelativeInput + rightRelativeInput;
+
+        if(move.sqrMagnitude != 0)
+            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(move), Time.deltaTime * turnSpeed);
+
         _characterController.Move(move * Time.deltaTime * curSpeed);
+        
         //if player is using gamepad
         if (Gamepad.all.Count > 0)
         {
@@ -182,10 +188,10 @@ public class NewPlayerScript : MonoBehaviour
             }
 
         }
-        if (move != Vector3.zero)
-        {
-            gameObject.transform.forward = move;
-        }
+        //if (move != Vector3.zero)
+        //{
+        //    gameObject.transform.forward = move;
+        //}
         if (curSpeed > 0 && move == Vector3.zero)
         {
             _characterController.Move(transform.forward * Time.deltaTime * curSpeed);

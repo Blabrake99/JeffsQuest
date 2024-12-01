@@ -3211,7 +3211,7 @@ MonoBehaviour:
   maxRunSpeedAcceleration: 4
   jumpSpeedMultiplyer: 1.1
   longJumpWalkDeceleration: 1.7
-  turnSpeed: 5
+  turnSpeed: 8
   fullJumpTime: 0.15
   longJumpStunTimer: 0.5
   collectibleTimer: 0.5
@@ -3224,7 +3224,6 @@ MonoBehaviour:
     m_Bits: 0
   _jumpPhase: 0
   ONGround: 0
-  lastPlayerInput: {x: 0, y: 0}
 --- !u!143 &8938832745243601626
 CharacterController:
   m_ObjectHideFlags: 0
