@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 850462565065802540}
   - component: {fileID: 1421702029472379981}
   m_Layer: 0
-  m_Name: Fan
+  m_Name: WindBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
