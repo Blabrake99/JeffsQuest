@@ -60,11 +60,21 @@ public class NewPlayerScript : MonoBehaviour
 
     private void Update()
     {
+        Vector3 forward = playerInputSpace.forward;
+        Vector3 right = playerInputSpace.transform.right;
+        forward.y = 0;
+        right.y = 0;
+        forward = forward.normalized;
+        right = right.normalized;
+        Vector3 forwardRelativeInput = _playerInput.y * forward;
+        Vector3 rightRelativeInput = _playerInput.x * right;
+
         ONGround = _characterController.isGrounded;
         _playerInput = actions.Player.Move.ReadValue<Vector2>();
         _playerInput = Vector3.ClampMagnitude(_playerInput, 1f);
         _desiredRunning = actions.Player.Run.ReadValue<float>();
         _desiredJump = actions.Player.Jump.ReadValue<float>();
+
         //transform.eulerAngles = Vector3.up * Mathf.Atan2(_playerInput.x, _playerInput.y) * Mathf.Rad2Deg;
         if (ONGround && _velocity.y < 0)
         {
@@ -87,7 +97,7 @@ public class NewPlayerScript : MonoBehaviour
             lastPlayerInput = _playerInput;
             FixWalkingAnim(false);
         }
-        Vector3 move = new Vector3(_playerInput.x, 0, _playerInput.y);
+        Vector3 move = forwardRelativeInput + rightRelativeInput;
         _characterController.Move(move * Time.deltaTime * curSpeed);
         //if player is using gamepad
         if (Gamepad.all.Count > 0)
@@ -163,7 +173,7 @@ public class NewPlayerScript : MonoBehaviour
             {
                 if (!isCrouching)
                 {
-                    curSpeed = (isCrouching) ? Mathf.Lerp(curSpeed, maxWalkSpeed, maxAcceleration * Time.deltaTime) : Mathf.Lerp(curSpeed, maxRunSpeed, maxRunSpeedAcceleration * Time.deltaTime);
+                    curSpeed = (_desiredRunning <= 0) ? Mathf.Lerp(curSpeed, maxWalkSpeed, maxAcceleration * Time.deltaTime) : Mathf.Lerp(curSpeed, maxRunSpeed, maxRunSpeedAcceleration * Time.deltaTime);
                 }
                 else
                 {

@@ -3202,7 +3202,7 @@ MonoBehaviour:
   longJumpHeight: 50
   longJumpDistance: 100
   longJumpKnockBackDistance: 7
-  maxAcceleration: 0.7
+  maxAcceleration: 2.4
   animatorWalkAcceleration: 0.2
   animatorWalkdeceleration: 0.5
   crouchDeceleration: 0.5
